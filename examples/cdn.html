@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>micro-charts - CDN/UMD Example</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    .subtitle {
+      margin-bottom: 2rem;
+      color: #666;
+    }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .chart-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .chart-card h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #666;
+    }
+    .chart-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Micro Charts</h1>
+  <p class="subtitle">CDN/UMD Example (IIFE bundle)</p>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h2>Gauge Chart</h2>
+      <div id="gauge" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Pie Chart</h2>
+      <div id="pie" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Bar Chart (Horizontal)</h2>
+      <div id="bar" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Progress Bar</h2>
+      <div id="progress" class="chart-container"></div>
+    </div>
+  </div>
+
+  <!-- Load IIFE bundle -->
+  <script src="../dist/index.global.js"></script>
+  <!--
+    In production, use CDN:
+    <script src="https://unpkg.com/@mango0422/micro-charts/dist/index.global.js"></script>
+  -->
+
+  <script>
+    // Access via global MicroCharts object
+    var MC = MicroCharts;
+    var GaugeChart = MC.GaugeChart;
+    var PieChart = MC.PieChart;
+    var BarChart = MC.BarChart;
+    var ProgressBar = MC.ProgressBar;
+
+    console.log('Micro Charts version:', MC.VERSION);
+
+    // Gauge Chart Example
+    var gauge = new GaugeChart(document.getElementById('gauge'), {
+      value: 42,
+      thresholds: { warning: 50, critical: 75 },
+      size: 180,
+    });
+
+    // Pie Chart Example
+    var pie = new PieChart(
+      document.getElementById('pie'),
+      [
+        { label: 'Success', value: 85, color: '#10b981' },
+        { label: 'Warning', value: 10, color: '#f59e0b' },
+        { label: 'Error', value: 5, color: '#ef4444' },
+      ],
+      {
+        size: 180,
+      }
+    );
+
+    // Bar Chart Example (Horizontal)
+    var bar = new BarChart(
+      document.getElementById('bar'),
+      [
+        { label: 'Server 1', value: 85 },
+        { label: 'Server 2', value: 60 },
+        { label: 'Server 3', value: 95 },
+        { label: 'Server 4', value: 45 },
+      ],
+      {
+        width: 300,
+        height: 180,
+        orientation: 'horizontal',
+        showValues: true,
+      }
+    );
+
+    // Progress Bar Example
+    var progress = new ProgressBar(document.getElementById('progress'), {
+      value: 78,
+      width: 280,
+      height: 24,
+      color: '#8b5cf6',
+    });
+
+    // Interactive demo: click gauge to randomize
+    document.getElementById('gauge').addEventListener('click', function() {
+      gauge.setData(Math.floor(Math.random() * 100));
+    });
+
+    // Update progress periodically
+    setInterval(function() {
+      progress.setData(Math.floor(Math.random() * 100));
+    }, 2500);
+  </script>
+</body>
+</html>

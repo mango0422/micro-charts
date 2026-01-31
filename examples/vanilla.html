@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>micro-charts - Vanilla JS Example</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    .subtitle {
+      margin-bottom: 2rem;
+      color: #666;
+    }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .chart-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .chart-card h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #666;
+    }
+    .chart-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Micro Charts</h1>
+  <p class="subtitle">Vanilla JS Example (ESM import)</p>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h2>Gauge Chart</h2>
+      <div id="gauge" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Pie Chart (Donut)</h2>
+      <div id="pie" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Bar Chart</h2>
+      <div id="bar" class="chart-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Progress Bar</h2>
+      <div id="progress" class="chart-container"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import from built module (run `npm run build` first)
+    import { GaugeChart, PieChart, BarChart, ProgressBar, VERSION } from '../dist/index.js';
+
+    console.log('Micro Charts version:', VERSION);
+
+    // Gauge Chart Example
+    const gauge = new GaugeChart(document.getElementById('gauge'), {
+      value: 75,
+      thresholds: { warning: 60, critical: 80 },
+      size: 180,
+    });
+
+    // Pie Chart Example (Donut mode)
+    const pie = new PieChart(
+      document.getElementById('pie'),
+      [
+        { label: 'Chrome', value: 65 },
+        { label: 'Safari', value: 19 },
+        { label: 'Firefox', value: 10 },
+        { label: 'Edge', value: 4 },
+        { label: 'Other', value: 2 },
+      ],
+      {
+        innerRadius: 0.5,
+        size: 180,
+        showLabels: true,
+      }
+    );
+
+    // Bar Chart Example
+    const bar = new BarChart(
+      document.getElementById('bar'),
+      [
+        { label: 'Jan', value: 120 },
+        { label: 'Feb', value: 150 },
+        { label: 'Mar', value: 180 },
+        { label: 'Apr', value: 140 },
+        { label: 'May', value: 200 },
+      ],
+      {
+        width: 300,
+        height: 180,
+        showValues: true,
+      }
+    );
+
+    // Progress Bar Example
+    const progress = new ProgressBar(document.getElementById('progress'), {
+      value: 65,
+      width: 280,
+      height: 24,
+    });
+
+    // Update charts periodically for demo
+    setInterval(() => {
+      gauge.setData(Math.floor(Math.random() * 100));
+    }, 3000);
+
+    setInterval(() => {
+      progress.setData(Math.floor(Math.random() * 100));
+    }, 2000);
+  </script>
+</body>
+</html>
