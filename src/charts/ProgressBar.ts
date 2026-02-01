@@ -10,7 +10,7 @@
  */
 
 import { CanvasRenderer } from '../core/canvas';
-import { animate } from '../core/animation';
+import { animate, scheduleRender } from '../core/animation';
 import { COLOR_TEXT, FONT_FAMILY } from '../core/constants';
 import type { AnimationController } from '../types';
 
@@ -55,7 +55,7 @@ export class ProgressBar {
   private _ctxFill: string | null = null;
 
   // Batch rendering
-  private _pending = false;
+  private _cancelRender?: () => void;
 
   constructor(container: HTMLElement | null, options: ProgressBarOptions) {
     if (!container) {
@@ -85,14 +85,11 @@ export class ProgressBar {
   }
 
   // === Batch rendering ===
-  private scheduleRender(): void {
-    if (!this._pending) {
-      this._pending = true;
-      queueMicrotask(() => {
-        this._pending = false;
-        this.render(this.currentValue);
-      });
+  private batchRender(): void {
+    if (this._cancelRender) {
+      this._cancelRender();
     }
+    this._cancelRender = scheduleRender(() => this.render(this.currentValue));
   }
 
   private updateCache(): void {
@@ -120,7 +117,7 @@ export class ProgressBar {
       );
     } else {
       this.currentValue = clampedValue;
-      this.scheduleRender();
+      this.batchRender();
     }
   }
 
@@ -131,23 +128,28 @@ export class ProgressBar {
 
     if (needsResize) {
       this.renderer.resize(this.options.width, this.options.height);
+      this.resetStyleCache(); // Reset cache only on resize
       this.updateCache();
     }
 
-    this.scheduleRender();
+    this.batchRender();
   }
 
   resize(width: number, height: number): void {
     this.options.width = width;
     this.options.height = height;
     this.renderer.resize(width, height);
+    this.resetStyleCache(); // Reset cache only on resize
     this.updateCache();
-    this.scheduleRender();
+    this.batchRender();
   }
 
   destroy(): void {
     if (this.animationController) {
       this.animationController.cancel();
+    }
+    if (this._cancelRender) {
+      this._cancelRender();
     }
     this.canvas.remove();
   }
@@ -158,7 +160,7 @@ export class ProgressBar {
     const ctx = this.renderer.ctx;
 
     this.renderer.clear();
-    this.resetStyleCache();
+    // Style cache is NOT reset here - only on resize
 
     const percentage = max > 0 ? value / max : 0;
     const progressWidth = width * percentage;

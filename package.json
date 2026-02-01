@@ -1,6 +1,6 @@
 {
   "name": "@mango0422/micro-charts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Lightweight, zero-dependency chart library inspired by uPlot. Canvas-based, high performance.",
   "author": "mango0422",
   "license": "MIT",
@@ -15,7 +15,11 @@
     "gauge",
     "pie",
     "bar",
-    "progress"
+    "progress",
+    "stacked-bar",
+    "heatmap",
+    "radar",
+    "funnel"
   ],
   "repository": {
     "type": "git",
@@ -35,8 +39,108 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.cts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./bar": {
+      "import": {
+        "types": "./dist/bar.d.ts",
+        "default": "./dist/bar.js"
+      },
+      "require": {
+        "types": "./dist/bar.d.ts",
+        "default": "./dist/bar.cjs"
+      }
+    },
+    "./gauge": {
+      "import": {
+        "types": "./dist/gauge.d.ts",
+        "default": "./dist/gauge.js"
+      },
+      "require": {
+        "types": "./dist/gauge.d.ts",
+        "default": "./dist/gauge.cjs"
+      }
+    },
+    "./pie": {
+      "import": {
+        "types": "./dist/pie.d.ts",
+        "default": "./dist/pie.js"
+      },
+      "require": {
+        "types": "./dist/pie.d.ts",
+        "default": "./dist/pie.cjs"
+      }
+    },
+    "./progress": {
+      "import": {
+        "types": "./dist/progress.d.ts",
+        "default": "./dist/progress.js"
+      },
+      "require": {
+        "types": "./dist/progress.d.ts",
+        "default": "./dist/progress.cjs"
+      }
+    },
+    "./colors": {
+      "import": {
+        "types": "./dist/colors.d.ts",
+        "default": "./dist/colors.js"
+      },
+      "require": {
+        "types": "./dist/colors.d.ts",
+        "default": "./dist/colors.cjs"
+      }
+    },
+    "./easing": {
+      "import": {
+        "types": "./dist/easing.d.ts",
+        "default": "./dist/easing.js"
+      },
+      "require": {
+        "types": "./dist/easing.d.ts",
+        "default": "./dist/easing.cjs"
+      }
+    },
+    "./stacked-bar": {
+      "import": {
+        "types": "./dist/stacked-bar.d.ts",
+        "default": "./dist/stacked-bar.js"
+      },
+      "require": {
+        "types": "./dist/stacked-bar.d.ts",
+        "default": "./dist/stacked-bar.cjs"
+      }
+    },
+    "./heatmap": {
+      "import": {
+        "types": "./dist/heatmap.d.ts",
+        "default": "./dist/heatmap.js"
+      },
+      "require": {
+        "types": "./dist/heatmap.d.ts",
+        "default": "./dist/heatmap.cjs"
+      }
+    },
+    "./radar": {
+      "import": {
+        "types": "./dist/radar.d.ts",
+        "default": "./dist/radar.js"
+      },
+      "require": {
+        "types": "./dist/radar.d.ts",
+        "default": "./dist/radar.cjs"
+      }
+    },
+    "./funnel": {
+      "import": {
+        "types": "./dist/funnel.d.ts",
+        "default": "./dist/funnel.js"
+      },
+      "require": {
+        "types": "./dist/funnel.d.ts",
+        "default": "./dist/funnel.cjs"
       }
     }
   },
@@ -46,7 +150,8 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "build:iife": "tsup --config tsup.iife.config.ts",
+    "dev": "NODE_ENV=development tsup --watch"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

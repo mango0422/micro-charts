@@ -10,7 +10,7 @@
  */
 
 import { CanvasRenderer } from '../core/canvas';
-import { animate } from '../core/animation';
+import { animate, scheduleRender } from '../core/animation';
 import {
   GAUGE_START_ANGLE,
   GAUGE_TOTAL_ANGLE,
@@ -84,7 +84,7 @@ export class GaugeChart {
   private _ctxLw = 0;
 
   // Batch rendering
-  private _pending = false;
+  private _cancelRender?: () => void;
 
   constructor(container: HTMLElement | null, options: GaugeChartOptions) {
     if (!container) {
@@ -128,14 +128,11 @@ export class GaugeChart {
   }
 
   // === Batch rendering ===
-  private scheduleRender(): void {
-    if (!this._pending) {
-      this._pending = true;
-      queueMicrotask(() => {
-        this._pending = false;
-        this.render(this.currentValue);
-      });
+  private batchRender(): void {
+    if (this._cancelRender) {
+      this._cancelRender();
     }
+    this._cancelRender = scheduleRender(() => this.render(this.currentValue));
   }
 
   /** Cache geometry calculations - only called on resize */
@@ -180,22 +177,59 @@ export class GaugeChart {
       );
     } else {
       this.currentValue = clampedValue;
-      this.scheduleRender();  // Batch rendering for non-animated updates
+      this.batchRender();
     }
   }
 
   setOptions(options: Partial<GaugeChartOptions>): void {
-    this.options = this.mergeOptions({ ...this.options, ...options });
+    // Field-by-field update instead of full merge
+    if (options.value !== undefined) this.options.value = options.value;
+    if (options.min !== undefined) this.options.min = options.min;
+    if (options.max !== undefined) this.options.max = options.max;
+    if (options.size !== undefined) this.options.size = options.size;
+    if (options.thickness !== undefined) this.options.thickness = options.thickness;
+    if (options.showValue !== undefined) this.options.showValue = options.showValue;
+    if (options.animate !== undefined) this.options.animate = options.animate;
+    if (options.duration !== undefined) this.options.duration = options.duration;
+
+    if (options.thresholds) {
+      if (options.thresholds.warning !== undefined) {
+        this.options.thresholds.warning = options.thresholds.warning;
+      }
+      if (options.thresholds.critical !== undefined) {
+        this.options.thresholds.critical = options.thresholds.critical;
+      }
+    }
+
+    if (options.colors) {
+      if (options.colors.normal !== undefined) {
+        this.options.colors.normal = options.colors.normal;
+      }
+      if (options.colors.warning !== undefined) {
+        this.options.colors.warning = options.colors.warning;
+      }
+      if (options.colors.critical !== undefined) {
+        this.options.colors.critical = options.colors.critical;
+      }
+      if (options.colors.background !== undefined) {
+        this.options.colors.background = options.colors.background;
+      }
+    }
+
     if (options.size || options.thickness) {
       this.renderer.resize(this.options.size, this.options.size);
+      this.resetStyleCache(); // Reset cache only on resize
       this.updateGeometry();
     }
-    this.scheduleRender();
+    this.batchRender();
   }
 
   destroy(): void {
     if (this.animationController) {
       this.animationController.cancel();
+    }
+    if (this._cancelRender) {
+      this._cancelRender();
     }
     this.canvas.remove();
   }
@@ -203,8 +237,9 @@ export class GaugeChart {
   resize(size: number): void {
     this.options.size = size;
     this.renderer.resize(size, size);
+    this.resetStyleCache(); // Reset cache only on resize
     this.updateGeometry();
-    this.scheduleRender();
+    this.batchRender();
   }
 
   /** Optimized render - style caching, cached geometry, direct ctx access */
@@ -213,7 +248,7 @@ export class GaugeChart {
     const ctx = this.renderer.ctx;
 
     this.renderer.clear();
-    this.resetStyleCache();  // Reset cache after clear
+    // Style cache is NOT reset here - only on resize
 
     // Use cached geometry values
     const cx = this._cx;

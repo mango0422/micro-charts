@@ -1,17 +1,33 @@
 import { defineConfig } from 'tsup';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm', 'cjs', 'iife'],
+  // Multiple entry points for optimal tree-shaking
+  entry: [
+    'src/index.ts',      // Main entry
+    'src/bar.ts',        // BarChart only
+    'src/gauge.ts',      // GaugeChart only
+    'src/pie.ts',        // PieChart only
+    'src/progress.ts',   // ProgressBar only
+    'src/stacked-bar.ts', // StackedBarChart only
+    'src/heatmap.ts',    // HeatMap only
+    'src/radar.ts',      // RadarChart only
+    'src/funnel.ts',     // FunnelChart only
+    'src/colors.ts',     // Color utilities only
+    'src/easing.ts',     // Easing functions only
+  ],
+  // ESM and CJS only for module builds (IIFE separate)
+  format: ['esm', 'cjs'],
   dts: true,
   clean: true,
   minify: true,
-  sourcemap: true,
-  globalName: 'MicroCharts',
+  // Sourcemap only in development
+  sourcemap: isDev,
   target: 'es2020',
   outExtension({ format }) {
     return {
-      js: format === 'cjs' ? '.cjs' : format === 'iife' ? '.global.js' : '.js',
+      js: format === 'cjs' ? '.cjs' : '.js',
     };
   },
 });

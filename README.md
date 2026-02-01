@@ -8,9 +8,10 @@
 
 ## Features
 
-- **Tiny**: ~4KB gzipped (all charts included)
+- **Tiny**: ~11KB gzipped (8 charts included), individual charts 1-3KB
 - **Zero dependencies**: Completely standalone
-- **Fast**: Canvas-based rendering, 60fps animations
+- **Fast**: Canvas-based rendering, 60fps animations, optimized with global rAF scheduler
+- **Tree-shakeable**: Import only what you need
 - **Flexible**: Framework-agnostic (Vanilla JS/TS)
 - **TypeScript**: Full type definitions included
 - **Easy**: Simple, uPlot-inspired API
@@ -25,7 +26,11 @@
 | Gauge                   | ❌    | ✅           |
 | Pie/Donut               | ❌    | ✅           |
 | Bar (categorical)       | ❌    | ✅           |
+| Stacked Bar             | ❌    | ✅           |
 | Progress                | ❌    | ✅           |
+| Heat Map                | ❌    | ✅           |
+| Radar/Spider            | ❌    | ✅           |
+| Funnel                  | ❌    | ✅           |
 
 Use together to replace heavy libraries like Chart.js, recharts, or amCharts.
 
@@ -109,6 +114,87 @@ const progress = new ProgressBar(document.getElementById("progress"), {
   value: 75,
   max: 100,
 });
+```
+
+### StackedBarChart
+
+```typescript
+import { StackedBarChart } from "@mango0422/micro-charts";
+
+const stackedBar = new StackedBarChart(
+  document.getElementById("stacked"),
+  {
+    categories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    series: [
+      { label: "Inbound", data: [120, 150, 180, 140, 200] },
+      { label: "Outbound", data: [80, 90, 100, 95, 110] },
+      { label: "Error", data: [5, 8, 3, 10, 6] },
+    ],
+  },
+  { showTotal: true, showLegend: true }
+);
+```
+
+### HeatMap
+
+```typescript
+import { HeatMap } from "@mango0422/micro-charts";
+
+const heatmap = new HeatMap(
+  document.getElementById("heatmap"),
+  {
+    rows: ["00:00", "01:00", "02:00", "03:00"],
+    columns: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    values: [
+      [120, 150, 180, 140, 200],
+      [80, 90, 100, 95, 110],
+      [60, 70, 65, 80, 75],
+      [40, 50, 55, 60, 65],
+    ],
+  },
+  { colorScheme: "sequential", showValues: true }
+);
+```
+
+### RadarChart
+
+```typescript
+import { RadarChart } from "@mango0422/micro-charts";
+
+const radar = new RadarChart(
+  document.getElementById("radar"),
+  {
+    axes: [
+      { label: "CPU", max: 100 },
+      { label: "Memory", max: 100 },
+      { label: "Disk", max: 100 },
+      { label: "Network", max: 100 },
+    ],
+    datasets: [
+      { label: "Server A", data: [80, 70, 90, 60], color: "#3b82f6" },
+      { label: "Server B", data: [60, 85, 75, 80], color: "#ef4444" },
+    ],
+  },
+  { showGrid: true, showLegend: true }
+);
+```
+
+### FunnelChart
+
+```typescript
+import { FunnelChart } from "@mango0422/micro-charts";
+
+const funnel = new FunnelChart(
+  document.getElementById("funnel"),
+  [
+    { label: "Packets Received", value: 10000 },
+    { label: "Valid Packets", value: 9500 },
+    { label: "Processed", value: 9200 },
+    { label: "Forwarded", value: 8800 },
+    { label: "Delivered", value: 8500 },
+  ],
+  { showPercentage: true, orientation: "vertical" }
+);
 ```
 
 ## API Reference
@@ -239,6 +325,171 @@ new ProgressBar(container: HTMLElement, options: ProgressBarOptions)
 - `setData(value: number)` - Update value with animation
 - `setOptions(options: Partial<ProgressBarOptions>)` - Update options
 - `resize(width: number, height: number)` - Resize the bar
+- `destroy()` - Cleanup and remove
+
+### StackedBarChart
+
+```typescript
+new StackedBarChart(container: HTMLElement, data: StackedBarData, options?: StackedBarOptions)
+```
+
+**Data:**
+
+```typescript
+interface StackedBarData {
+  categories: string[]; // X-axis labels
+  series: Array<{
+    label: string; // Series name
+    data: number[]; // Values for each category
+    color?: string; // Auto-generated if not provided
+  }>;
+}
+```
+
+**Options:**
+
+| Option         | Type     | Default    | Description                        |
+| -------------- | -------- | ---------- | ---------------------------------- |
+| `width`        | number   | 500        | Canvas width (px)                  |
+| `height`       | number   | 300        | Canvas height (px)                 |
+| `orientation`  | string   | 'vertical' | 'vertical' or 'horizontal'         |
+| `barThickness` | number   | 0.7        | Bar thickness ratio (0-1)          |
+| `showValues`   | boolean  | false      | Show value labels on segments      |
+| `showTotal`    | boolean  | true       | Show total on top of stack         |
+| `showLegend`   | boolean  | true       | Show series legend                 |
+| `showGrid`     | boolean  | true       | Show background grid               |
+| `animate`      | boolean  | true       | Enable animation                   |
+| `duration`     | number   | 600        | Animation duration (ms)            |
+| `stacked100`   | boolean  | false      | Normalize to 100%                  |
+
+**Methods:**
+
+- `setData(data: StackedBarData)` - Update data with animation
+- `setOptions(options: Partial<StackedBarOptions>)` - Update options
+- `resize(width: number, height: number)` - Resize the chart
+- `destroy()` - Cleanup and remove
+
+### HeatMap
+
+```typescript
+new HeatMap(container: HTMLElement, data: HeatMapData, options?: HeatMapOptions)
+```
+
+**Data:**
+
+```typescript
+interface HeatMapData {
+  rows: string[]; // Y-axis labels
+  columns: string[]; // X-axis labels
+  values: number[][]; // 2D array [row][col]
+}
+```
+
+**Options:**
+
+| Option           | Type     | Default      | Description                            |
+| ---------------- | -------- | ------------ | -------------------------------------- |
+| `width`          | number   | 600          | Canvas width (px)                      |
+| `height`         | number   | 400          | Canvas height (px)                     |
+| `cellPadding`    | number   | 2            | Padding between cells                  |
+| `showValues`     | boolean  | false        | Show numeric values in cells           |
+| `colorScheme`    | string   | 'sequential' | 'sequential' or 'diverging'            |
+| `colors`         | object   | -            | `{ min, mid, max }` color configuration|
+| `min`            | number   | auto         | Manual min value                       |
+| `max`            | number   | auto         | Manual max value                       |
+| `showAxisLabels` | boolean  | true         | Show row/column labels                 |
+| `animate`        | boolean  | true         | Enable animation                       |
+| `duration`       | number   | 400          | Animation duration (ms)                |
+| `onCellClick`    | function | -            | Click handler `(row, col, value) => void`|
+
+**Methods:**
+
+- `setData(data: HeatMapData)` - Update data with animation
+- `setOptions(options: Partial<HeatMapOptions>)` - Update options
+- `resize(width: number, height: number)` - Resize the chart
+- `destroy()` - Cleanup and remove
+
+### RadarChart
+
+```typescript
+new RadarChart(container: HTMLElement, data: RadarChartData, options?: RadarChartOptions)
+```
+
+**Data:**
+
+```typescript
+interface RadarChartData {
+  axes: Array<{
+    label: string; // Axis name
+    max?: number; // Max value for this axis
+  }>;
+  datasets: Array<{
+    label: string; // Dataset name
+    data: number[]; // Values for each axis
+    color?: string; // Auto-generated if not provided
+    fill?: boolean; // Fill polygon, default: true
+    fillOpacity?: number; // Fill opacity 0-1, default: 0.2
+  }>;
+}
+```
+
+**Options:**
+
+| Option       | Type    | Default | Description                  |
+| ------------ | ------- | ------- | ---------------------------- |
+| `size`       | number  | 400     | Canvas size (px, square)     |
+| `levels`     | number  | 5       | Number of concentric levels  |
+| `showGrid`   | boolean | true    | Show grid lines              |
+| `showLabels` | boolean | true    | Show axis labels             |
+| `showValues` | boolean | false   | Show data point values       |
+| `showLegend` | boolean | true    | Show dataset legend          |
+| `animate`    | boolean | true    | Enable animation             |
+| `duration`   | number  | 600     | Animation duration (ms)      |
+
+**Methods:**
+
+- `setData(data: RadarChartData)` - Update data with animation
+- `setOptions(options: Partial<RadarChartOptions>)` - Update options
+- `resize(size: number)` - Resize the chart
+- `destroy()` - Cleanup and remove
+
+### FunnelChart
+
+```typescript
+new FunnelChart(container: HTMLElement, data: FunnelChartData, options?: FunnelChartOptions)
+```
+
+**Data:**
+
+```typescript
+type FunnelChartData = Array<{
+  label: string; // Stage name
+  value: number; // Count at this stage
+  color?: string; // Auto-generated if not provided
+}>;
+```
+
+**Options:**
+
+| Option           | Type     | Default    | Description                        |
+| ---------------- | -------- | ---------- | ---------------------------------- |
+| `width`          | number   | 500        | Canvas width (px)                  |
+| `height`         | number   | 400        | Canvas height (px)                 |
+| `orientation`    | string   | 'vertical' | 'vertical' or 'horizontal'         |
+| `neckRatio`      | number   | 0.3        | Width ratio at bottom              |
+| `gap`            | number   | 4          | Gap between stages                 |
+| `showLabels`     | boolean  | true       | Show stage labels                  |
+| `showValues`     | boolean  | true       | Show values                        |
+| `showPercentage` | boolean  | true       | Show % of previous stage           |
+| `animate`        | boolean  | true       | Enable animation                   |
+| `duration`       | number   | 600        | Animation duration (ms)            |
+| `onStageClick`   | function | -          | Click handler `(index, stage) => void`|
+
+**Methods:**
+
+- `setData(data: FunnelChartData)` - Update data with animation
+- `setOptions(options: Partial<FunnelChartOptions>)` - Update options
+- `resize(width: number, height: number)` - Resize the chart
 - `destroy()` - Cleanup and remove
 
 ## Framework Integration

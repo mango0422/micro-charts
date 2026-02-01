@@ -4,7 +4,7 @@
  */
 
 // Version
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.0';
 
 // Types
 export type {
@@ -52,3 +52,15 @@ export type { BarChartData, BarChartOptions } from './charts/BarChart';
 
 export { ProgressBar } from './charts/ProgressBar';
 export type { ProgressBarOptions } from './charts/ProgressBar';
+
+export { StackedBarChart } from './charts/StackedBarChart';
+export type { StackedBarData, StackedBarOptions } from './charts/StackedBarChart';
+
+export { HeatMap } from './charts/HeatMap';
+export type { HeatMapData, HeatMapOptions } from './charts/HeatMap';
+
+export { RadarChart } from './charts/RadarChart';
+export type { RadarChartData, RadarChartOptions } from './charts/RadarChart';
+
+export { FunnelChart } from './charts/FunnelChart';
+export type { FunnelChartData, FunnelChartOptions } from './charts/FunnelChart';

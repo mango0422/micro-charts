@@ -11,7 +11,7 @@
  */
 
 import { CanvasRenderer } from '../core/canvas';
-import { animate } from '../core/animation';
+import { animate, scheduleRender } from '../core/animation';
 import { generateColorPalette } from '../core/colors';
 import { DEG_TO_RAD, TWO_PI, COLOR_TEXT, FONT_FAMILY } from '../core/constants';
 import type { AnimationController } from '../types';
@@ -73,7 +73,7 @@ export class PieChart {
   private _ctxFill: string | null = null;
 
   // Batch rendering
-  private _pending = false;
+  private _cancelRender?: () => void;
 
   constructor(container: HTMLElement | null, data: PieChartData[], options?: PieChartOptions) {
     if (!container) {
@@ -110,14 +110,11 @@ export class PieChart {
   }
 
   // === Batch rendering ===
-  private scheduleRender(progress = 1): void {
-    if (!this._pending) {
-      this._pending = true;
-      queueMicrotask(() => {
-        this._pending = false;
-        this.render(progress);
-      });
+  private batchRender(progress = 1): void {
+    if (this._cancelRender) {
+      this._cancelRender();
     }
+    this._cancelRender = scheduleRender(() => this.render(progress));
   }
 
   /** Cache geometry calculations */
@@ -211,7 +208,7 @@ export class PieChart {
     if (this.options.animate) {
       this.animateIn();
     } else {
-      this.scheduleRender();
+      this.batchRender();
     }
   }
 
@@ -223,25 +220,30 @@ export class PieChart {
 
     if (needsResize) {
       this.renderer.resize(this.options.size, this.options.size);
+      this.resetStyleCache(); // Reset cache only on resize
     }
     if (needsResize || needsRecalc) {
       this.updateGeometry();
     }
 
     this.calculateSegments();
-    this.scheduleRender();
+    this.batchRender();
   }
 
   resize(size: number): void {
     this.options.size = size;
     this.renderer.resize(size, size);
+    this.resetStyleCache(); // Reset cache only on resize
     this.updateGeometry();
-    this.scheduleRender();
+    this.batchRender();
   }
 
   destroy(): void {
     if (this.animationController) {
       this.animationController.cancel();
+    }
+    if (this._cancelRender) {
+      this._cancelRender();
     }
     if (this.clickHandler) {
       this.canvas.removeEventListener('click', this.clickHandler);
@@ -255,7 +257,7 @@ export class PieChart {
     const { showLabels } = this.options;
 
     this.renderer.clear();
-    this.resetStyleCache();
+    // Style cache is NOT reset here - only on resize
 
     const cx = this._cx;
     const cy = this._cy;

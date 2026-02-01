@@ -10,7 +10,7 @@
  */
 
 import { CanvasRenderer } from '../core/canvas';
-import { animate } from '../core/animation';
+import { animate, scheduleRender } from '../core/animation';
 import { generateColorPalette } from '../core/colors';
 import { COLOR_GRID, COLOR_TEXT, FONT_FAMILY, FONT_SIZE_MD } from '../core/constants';
 import type { AnimationController } from '../types';
@@ -69,7 +69,7 @@ export class BarChart {
   private _ctxLw = 0;
 
   // Batch rendering
-  private _pending = false;
+  private _cancelRender?: () => void;
 
   constructor(container: HTMLElement | null, data: BarChartData[], options?: BarChartOptions) {
     if (!container) {
@@ -118,14 +118,11 @@ export class BarChart {
   }
 
   // === Batch rendering ===
-  private scheduleRender(): void {
-    if (!this._pending) {
-      this._pending = true;
-      queueMicrotask(() => {
-        this._pending = false;
-        this.render(1);
-      });
+  private batchRender(): void {
+    if (this._cancelRender) {
+      this._cancelRender();
     }
+    this._cancelRender = scheduleRender(() => this.render(1));
   }
 
   /** Cache layout calculations */
@@ -140,8 +137,19 @@ export class BarChart {
     this._barSpace = isVertical ? this._chartW / barCount : this._chartH / barCount;
     this._barSize = this._barSpace * barThickness;
 
-    // Calculate max and generate colors
-    this._maxValue = this.options.max ?? Math.max(...this.data.map(d => d.value), 1);
+    // Calculate max - zero allocation loop
+    if (this.options.max !== undefined) {
+      this._maxValue = this.options.max;
+    } else {
+      let max = 1;
+      for (let i = 0; i < this.data.length; i++) {
+        const val = this.data[i]!.value;
+        if (val > max) max = val;
+      }
+      this._maxValue = max;
+    }
+
+    // Generate colors
     this._colors = generateColorPalette(this.data.length);
   }
 
@@ -160,7 +168,7 @@ export class BarChart {
     if (this.options.animate) {
       this.animateIn();
     } else {
-      this.scheduleRender();
+      this.batchRender();
     }
   }
 
@@ -171,23 +179,28 @@ export class BarChart {
 
     if (needsResize) {
       this.renderer.resize(this.options.width, this.options.height);
+      this.resetStyleCache(); // Reset cache only on resize
     }
 
     this.updateLayout();
-    this.scheduleRender();
+    this.batchRender();
   }
 
   resize(width: number, height: number): void {
     this.options.width = width;
     this.options.height = height;
     this.renderer.resize(width, height);
+    this.resetStyleCache(); // Reset cache only on resize
     this.updateLayout();
-    this.scheduleRender();
+    this.batchRender();
   }
 
   destroy(): void {
     if (this.animationController) {
       this.animationController.cancel();
+    }
+    if (this._cancelRender) {
+      this._cancelRender();
     }
     this.canvas.remove();
   }
@@ -199,7 +212,7 @@ export class BarChart {
     const isVertical = orientation === 'vertical';
 
     this.renderer.clear();
-    this.resetStyleCache();
+    // Style cache is NOT reset here - only on resize
 
     const chartW = this._chartW;
     const chartH = this._chartH;
@@ -248,16 +261,21 @@ export class BarChart {
         const barW = chartW * valueRatio;
         ctx.fillRect(PADDING, y, barW, barSize);
       }
+    }
 
-      // Value labels
-      if (showValues && progress === 1) {
-        this.setFill(ctx, COLOR_TEXT);
-        ctx.font = `${FONT_SIZE_MD}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+    // Value labels (set text state once outside loop)
+    if (showValues && progress === 1) {
+      this.setFill(ctx, COLOR_TEXT);
+      ctx.font = `${FONT_SIZE_MD}px ${FONT_FAMILY}`;
+      ctx.textBaseline = 'middle';
 
+      for (let i = 0; i < data.length; i++) {
+        const d = data[i]!;
+        const valueRatio = maxValue > 0 ? d.value / maxValue : 0;
         const val = Math.round(d.value).toString();
+
         if (isVertical) {
+          ctx.textAlign = 'center';
           ctx.fillText(val, PADDING + barSpace * i + barSpace / 2, PADDING + chartH * (1 - valueRatio) - 8);
         } else {
           ctx.textAlign = 'left';

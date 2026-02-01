@@ -1,11 +1,7 @@
 /**
  * Shared constants for micro-charts
- * Performance: Pre-computed values and object pools
+ * Performance: Pre-computed values
  */
-
-// === Object Pools (avoid allocation) ===
-export const EMPTY_OBJ: Readonly<Record<string, never>> = Object.freeze({});
-export const EMPTY_ARR: readonly never[] = Object.freeze([]);
 
 // === Math Constants (pre-computed) ===
 export const PI = Math.PI;
@@ -37,18 +33,6 @@ export const COLOR_TICK = '#eee';       // Tick marks
 export const COLOR_NORMAL = '#2196F3';  // Blue (healthy)
 export const COLOR_WARNING = '#FF9800'; // Orange (warning)
 export const COLOR_CRITICAL = '#F44336'; // Red (critical)
-
-// === Default palette (8 colors - uPlot-style muted tones) ===
-export const DEFAULT_COLORS = Object.freeze([
-  '#2196F3', // Blue
-  '#F44336', // Red
-  '#4CAF50', // Green
-  '#FF9800', // Orange
-  '#9C27B0', // Purple
-  '#00BCD4', // Cyan
-  '#795548', // Brown
-  '#607D8B', // Blue Gray
-] as const);
 
 // === Font (uPlot-compatible) ===
 export const FONT_FAMILY = 'system-ui, -apple-system, Arial, sans-serif';

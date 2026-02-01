@@ -51,11 +51,13 @@ export class CanvasRenderer {
   resize(width: number, height: number): void {
     this._width = width;
     this._height = height;
-    this.canvas.width = width * this.dpr;
-    this.canvas.height = height * this.dpr;
+    const dpr = this.dpr;
+    this.canvas.width = Math.round(width * dpr);
+    this.canvas.height = Math.round(height * dpr);
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
-    this.ctx.scale(this.dpr, this.dpr);
+    // Use setTransform instead of scale to avoid accumulation
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   /** Clear entire canvas */
