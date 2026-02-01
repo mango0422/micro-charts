@@ -48,7 +48,7 @@ const DEFAULT_OPTIONS: RequiredFunnelOptions = {
   showLabels: true,
   showValues: true,
   showPercentage: true,
-  animate: true,
+  animate: false,
   duration: 600,
 };
 

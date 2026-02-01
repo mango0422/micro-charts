@@ -59,7 +59,7 @@ const DEFAULT_OPTIONS: RequiredHeatMapOptions = {
     max: '#1e40af',
   },
   showAxisLabels: true,
-  animate: true,
+  animate: false,
   duration: 400,
 };
 

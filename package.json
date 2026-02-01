@@ -1,6 +1,6 @@
 {
   "name": "@mango0422/micro-charts",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Lightweight, zero-dependency chart library inspired by uPlot. Canvas-based, high performance.",
   "author": "mango0422",
   "license": "MIT",
@@ -19,7 +19,11 @@
     "stacked-bar",
     "heatmap",
     "radar",
-    "funnel"
+    "funnel",
+    "horizontal-bar",
+    "vertical-bar",
+    "multi-line",
+    "time-series"
   ],
   "repository": {
     "type": "git",
@@ -141,6 +145,36 @@
       "require": {
         "types": "./dist/funnel.d.ts",
         "default": "./dist/funnel.cjs"
+      }
+    },
+    "./horizontal-bar": {
+      "import": {
+        "types": "./dist/horizontal-bar.d.ts",
+        "default": "./dist/horizontal-bar.js"
+      },
+      "require": {
+        "types": "./dist/horizontal-bar.d.ts",
+        "default": "./dist/horizontal-bar.cjs"
+      }
+    },
+    "./vertical-bar": {
+      "import": {
+        "types": "./dist/vertical-bar.d.ts",
+        "default": "./dist/vertical-bar.js"
+      },
+      "require": {
+        "types": "./dist/vertical-bar.d.ts",
+        "default": "./dist/vertical-bar.cjs"
+      }
+    },
+    "./multi-line": {
+      "import": {
+        "types": "./dist/multi-line.d.ts",
+        "default": "./dist/multi-line.js"
+      },
+      "require": {
+        "types": "./dist/multi-line.d.ts",
+        "default": "./dist/multi-line.cjs"
       }
     }
   },

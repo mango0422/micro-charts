@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Micro Charts - Performance Benchmarks</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding: 40px;
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+        color: #2563eb;
+      }
+
+      .subtitle {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 40px;
+      }
+
+      .controls {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .control-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #555;
+      }
+
+      select, button {
+        padding: 10px 16px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+      }
+
+      select {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        font-weight: 600;
+        margin-right: 10px;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      button:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+
+      .results {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .results h2 {
+        font-size: 20px;
+        margin-bottom: 16px;
+        color: #333;
+      }
+
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .metric:last-child {
+        border-bottom: none;
+      }
+
+      .metric-label {
+        font-weight: 600;
+        color: #555;
+      }
+
+      .metric-value {
+        font-family: 'Courier New', monospace;
+        color: #2563eb;
+        font-weight: 600;
+      }
+
+      .chart-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      #chart {
+        width: 100%;
+        height: 400px;
+      }
+
+      .warning {
+        background: #fef3c7;
+        border: 1px solid #fbbf24;
+        color: #92400e;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+
+      .success {
+        background: #d1fae5;
+        border: 1px solid #10b981;
+        color: #065f46;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Micro Charts Performance Benchmarks</h1>
+    <p class="subtitle">Measure rendering performance with different data sizes</p>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="chart-type">Chart Type</label>
+        <select id="chart-type">
+          <option value="multi-line">Multi-Line Chart (Time Series)</option>
+          <option value="vertical-bar">Vertical Bar Chart</option>
+          <option value="horizontal-bar">Horizontal Bar Chart</option>
+          <option value="pie">Pie Chart</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="data-size">Data Points</label>
+        <select id="data-size">
+          <option value="100">100 points</option>
+          <option value="500">500 points</option>
+          <option value="1000">1,000 points</option>
+          <option value="5000">5,000 points</option>
+          <option value="10000">10,000 points</option>
+          <option value="50000">50,000 points (may be slow)</option>
+          <option value="100000">100,000 points (may be very slow)</option>
+        </select>
+      </div>
+
+      <button id="run-benchmark">Run Benchmark</button>
+      <button id="run-all">Run All Combinations</button>
+    </div>
+
+    <div id="message-container"></div>
+
+    <div class="results" id="results" style="display: none;">
+      <h2>Benchmark Results</h2>
+      <div class="metric">
+        <span class="metric-label">Chart Type</span>
+        <span class="metric-value" id="result-chart-type">-</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Data Points</span>
+        <span class="metric-value" id="result-data-points">-</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Initial Render Time</span>
+        <span class="metric-value" id="result-render-time">-</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Update Time (setData)</span>
+        <span class="metric-value" id="result-update-time">-</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Memory Usage (approx)</span>
+        <span class="metric-value" id="result-memory">-</span>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div id="chart"></div>
+    </div>
+
+    <script src="../dist/index.global.js"></script>
+    <script>
+      const chartEl = document.getElementById('chart');
+      const chartTypeSelect = document.getElementById('chart-type');
+      const dataSizeSelect = document.getElementById('data-size');
+      const runButton = document.getElementById('run-benchmark');
+      const runAllButton = document.getElementById('run-all');
+      const resultsDiv = document.getElementById('results');
+      const messageContainer = document.getElementById('message-container');
+
+      let currentChart = null;
+
+      // Generate test data
+      function generateMultiLineData(count) {
+        const series = [
+          { key: 'series1', name: 'Series 1', color: '#3b82f6' },
+          { key: 'series2', name: 'Series 2', color: '#ef4444' },
+          { key: 'series3', name: 'Series 3', color: '#10b981' }
+        ];
+
+        const data = [];
+        const startTime = Date.now() - count * 1000;
+
+        for (let i = 0; i < count; i++) {
+          data.push({
+            timestamp: startTime + i * 1000,
+            series1: 20 + Math.sin(i / 10) * 10 + Math.random() * 5,
+            series2: 30 + Math.cos(i / 8) * 15 + Math.random() * 5,
+            series3: 25 + Math.sin(i / 12) * 8 + Math.random() * 3
+          });
+        }
+
+        return { data, series };
+      }
+
+      function generateVerticalBarData(count) {
+        const data = [];
+        for (let i = 0; i < count; i++) {
+          data.push({
+            label: `Item ${i + 1}`,
+            value: Math.random() * 100,
+            color: `hsl(${(i * 360) / count}, 70%, 60%)`
+          });
+        }
+        return data;
+      }
+
+      function generateHorizontalBarData(count) {
+        const data = [];
+        for (let i = 0; i < count; i++) {
+          data.push({
+            label: `Resource ${i + 1}`,
+            value: Math.random() * 100,
+            color: `hsl(${(i * 360) / count}, 70%, 60%)`
+          });
+        }
+        return data;
+      }
+
+      function generatePieData(count) {
+        const data = [];
+        for (let i = 0; i < count; i++) {
+          data.push({
+            label: `Segment ${i + 1}`,
+            value: Math.random() * 100,
+            color: `hsl(${(i * 360) / count}, 70%, 60%)`
+          });
+        }
+        return data;
+      }
+
+      function showMessage(message, type = 'warning') {
+        messageContainer.innerHTML = `<div class="${type}">${message}</div>`;
+        setTimeout(() => {
+          messageContainer.innerHTML = '';
+        }, 5000);
+      }
+
+      async function runBenchmark(chartType, dataSize) {
+        // Clear previous chart
+        if (currentChart) {
+          currentChart.destroy();
+          currentChart = null;
+        }
+        chartEl.innerHTML = '';
+
+        const count = parseInt(dataSize);
+
+        if (count >= 50000) {
+          showMessage(`⚠️ Testing with ${count.toLocaleString()} points. This may take a while...`, 'warning');
+        }
+
+        // Measure memory before (approximate)
+        const memBefore = performance.memory ? performance.memory.usedJSHeapSize : 0;
+
+        // Generate data
+        let data, series, options;
+
+        const dataGenStart = performance.now();
+
+        switch (chartType) {
+          case 'multi-line':
+            const mlData = generateMultiLineData(count);
+            data = mlData.data;
+            series = mlData.series;
+            options = {
+              width: chartEl.clientWidth,
+              height: 400,
+              series,
+              xAxis: { label: 'Time' },
+              yAxis: { label: 'Value' }
+            };
+            break;
+
+          case 'vertical-bar':
+            data = generateVerticalBarData(count);
+            options = {
+              width: chartEl.clientWidth,
+              height: 400,
+              barWidth: Math.max(2, Math.min(40, chartEl.clientWidth / count - 2))
+            };
+            break;
+
+          case 'horizontal-bar':
+            data = generateHorizontalBarData(count);
+            options = {
+              width: chartEl.clientWidth,
+              height: Math.max(400, count * 25),
+              barHeight: Math.max(10, Math.min(30, 400 / count - 2))
+            };
+            break;
+
+          case 'pie':
+            data = generatePieData(Math.min(count, 50)); // Pie charts don't make sense with too many slices
+            options = {
+              width: chartEl.clientWidth,
+              height: 400
+            };
+            if (count > 50) {
+              showMessage('Pie charts limited to 50 slices maximum for readability', 'warning');
+            }
+            break;
+        }
+
+        const dataGenTime = performance.now() - dataGenStart;
+
+        // Measure initial render
+        const renderStart = performance.now();
+
+        switch (chartType) {
+          case 'multi-line':
+            currentChart = new MicroCharts.MultiLineChart(chartEl, data, options);
+            break;
+          case 'vertical-bar':
+            currentChart = new MicroCharts.VerticalBarChart(chartEl, data, options);
+            break;
+          case 'horizontal-bar':
+            currentChart = new MicroCharts.HorizontalBarChart(chartEl, data, options);
+            break;
+          case 'pie':
+            currentChart = new MicroCharts.PieChart(chartEl, data, options);
+            break;
+        }
+
+        const renderTime = performance.now() - renderStart;
+
+        // Measure update time
+        let updateTime = 0;
+        if (chartType === 'multi-line') {
+          const updateStart = performance.now();
+          currentChart.setData(data);
+          updateTime = performance.now() - updateStart;
+        } else {
+          const updateStart = performance.now();
+          currentChart.setData(data);
+          updateTime = performance.now() - updateStart;
+        }
+
+        // Measure memory after (approximate)
+        const memAfter = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        const memDelta = memAfter - memBefore;
+
+        // Display results
+        resultsDiv.style.display = 'block';
+        document.getElementById('result-chart-type').textContent =
+          chartType.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+        document.getElementById('result-data-points').textContent = count.toLocaleString();
+        document.getElementById('result-render-time').textContent = `${renderTime.toFixed(2)}ms`;
+        document.getElementById('result-update-time').textContent = `${updateTime.toFixed(2)}ms`;
+        document.getElementById('result-memory').textContent =
+          performance.memory ? `${(memDelta / 1024 / 1024).toFixed(2)} MB` : 'N/A (requires Chrome)';
+
+        showMessage(
+          `✓ Benchmark complete: ${renderTime.toFixed(2)}ms initial render, ${updateTime.toFixed(2)}ms update`,
+          'success'
+        );
+
+        return {
+          chartType,
+          dataSize: count,
+          dataGenTime,
+          renderTime,
+          updateTime,
+          memoryDelta: memDelta
+        };
+      }
+
+      runButton.addEventListener('click', async () => {
+        runButton.disabled = true;
+        runAllButton.disabled = true;
+
+        const chartType = chartTypeSelect.value;
+        const dataSize = dataSizeSelect.value;
+
+        try {
+          await runBenchmark(chartType, dataSize);
+        } catch (err) {
+          showMessage(`Error: ${err.message}`, 'warning');
+        }
+
+        runButton.disabled = false;
+        runAllButton.disabled = false;
+      });
+
+      runAllButton.addEventListener('click', async () => {
+        runButton.disabled = true;
+        runAllButton.disabled = true;
+
+        const chartTypes = ['multi-line', 'vertical-bar', 'horizontal-bar', 'pie'];
+        const dataSizes = ['100', '500', '1000', '5000', '10000'];
+        const results = [];
+
+        showMessage('Running all benchmarks... This will take a while.', 'warning');
+
+        for (const chartType of chartTypes) {
+          for (const dataSize of dataSizes) {
+            try {
+              const result = await runBenchmark(chartType, dataSize);
+              results.push(result);
+              await new Promise(resolve => setTimeout(resolve, 500)); // Brief pause between tests
+            } catch (err) {
+              console.error(`Error in ${chartType} with ${dataSize} points:`, err);
+            }
+          }
+        }
+
+        console.table(results);
+        showMessage(`✓ All benchmarks complete! Results logged to console.`, 'success');
+
+        runButton.disabled = false;
+        runAllButton.disabled = false;
+      });
+
+      // Run initial benchmark
+      runBenchmark('multi-line', '1000');
+    </script>
+  </body>
+</html>

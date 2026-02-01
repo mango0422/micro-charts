@@ -60,7 +60,7 @@ const DEFAULT_OPTIONS: Omit<RequiredGaugeOptions, 'value'> = {
     background: COLOR_BG,
   },
   showValue: true,
-  animate: true,
+  animate: false,
   duration: 500,
 };
 

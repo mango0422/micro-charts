@@ -49,7 +49,7 @@ const DEFAULT_OPTIONS: RequiredRadarOptions = {
   showLabels: true,
   showValues: false,
   showLegend: true,
-  animate: true,
+  animate: false,
   duration: 600,
 };
 

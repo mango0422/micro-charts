@@ -42,7 +42,7 @@ const DEFAULT_OPTIONS: RequiredBarOptions = {
   barThickness: 0.6,
   showValues: false,
   showGrid: true,
-  animate: true,
+  animate: false,
   duration: 500,
 };
 

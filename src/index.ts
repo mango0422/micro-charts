@@ -4,7 +4,7 @@
  */
 
 // Version
-export const VERSION = '0.2.3';
+export const VERSION = '0.2.4';
 
 // Types
 export type {
@@ -64,4 +64,13 @@ export type { RadarChartData, RadarChartOptions } from './charts/RadarChart';
 
 export { FunnelChart } from './charts/FunnelChart';
 export type { FunnelChartData, FunnelChartOptions } from './charts/FunnelChart';
+
+export { HorizontalBarChart } from './charts/HorizontalBarChart';
+export type { HorizontalBarData, HorizontalBarChartOptions } from './charts/HorizontalBarChart';
+
+export { VerticalBarChart } from './charts/VerticalBarChart';
+export type { VerticalBarData, VerticalBarChartOptions } from './charts/VerticalBarChart';
+
+export { MultiLineChart } from './charts/MultiLineChart';
+export type { MultiLineData, ColumnBasedData, SeriesConfig, MultiLineChartOptions } from './charts/MultiLineChart';
 

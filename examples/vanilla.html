@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>micro-charts - Vanilla JS Example</title>
+  <title>Micro Charts - Live Examples</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,130 +11,517 @@
       padding: 0;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      padding: 2rem;
-      background: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
     }
     h1 {
+      font-size: 3rem;
+      font-weight: 800;
       margin-bottom: 0.5rem;
-      color: #333;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
     .subtitle {
-      margin-bottom: 2rem;
-      color: #666;
+      font-size: 1.2rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+    .version {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-family: 'Courier New', monospace;
     }
     .chart-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
     }
     .chart-card {
       background: white;
-      border-radius: 8px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .chart-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
     }
     .chart-card h2 {
-      font-size: 1rem;
-      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-weight: 700;
+    }
+    .chart-card .description {
+      font-size: 0.85rem;
       color: #666;
+      margin-bottom: 1.5rem;
     }
     .chart-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 200px;
+      min-height: 220px;
+    }
+    .interactive-hint {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+    footer {
+      text-align: center;
+      color: white;
+      opacity: 0.8;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Micro Charts</h1>
-  <p class="subtitle">Vanilla JS Example (ESM import)</p>
+  <div class="container">
+    <header>
+      <h1>📊 Micro Charts</h1>
+      <p class="subtitle">Lightweight, zero-dependency chart library</p>
+      <p class="version">v<span id="version">0.2.4</span> • ~15KB gzipped • 11 chart types</p>
+    </header>
 
-  <div class="chart-grid">
-    <div class="chart-card">
-      <h2>Gauge Chart</h2>
-      <div id="gauge" class="chart-container"></div>
+    <div class="chart-grid">
+      <!-- Gauge Chart -->
+      <div class="chart-card">
+        <h2>⚡ Gauge Chart</h2>
+        <p class="description">Perfect for metrics, KPIs, and progress indicators with color thresholds</p>
+        <div id="gauge" class="chart-container"></div>
+        <p class="interactive-hint">Click to randomize value</p>
+      </div>
+
+      <!-- Pie Chart -->
+      <div class="chart-card">
+        <h2>🥧 Pie Chart</h2>
+        <p class="description">Visualize proportions and percentages with donut mode support</p>
+        <div id="pie" class="chart-container"></div>
+        <p class="interactive-hint">Click slices to interact</p>
+      </div>
+
+      <!-- Bar Chart -->
+      <div class="chart-card">
+        <h2>📊 Bar Chart</h2>
+        <p class="description">Compare categorical data with vertical or horizontal bars</p>
+        <div id="bar" class="chart-container"></div>
+        <p class="interactive-hint">Hover over bars</p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="chart-card">
+        <h2>📈 Progress Bar</h2>
+        <p class="description">Track completion status with smooth animations</p>
+        <div id="progress" class="chart-container"></div>
+        <p class="interactive-hint">Auto-updating every 2.5s</p>
+      </div>
+
+      <!-- Stacked Bar Chart -->
+      <div class="chart-card">
+        <h2>📚 Stacked Bar Chart</h2>
+        <p class="description">Multi-series data with stacked or grouped visualization</p>
+        <div id="stacked" class="chart-container"></div>
+        <p class="interactive-hint">Shows network traffic breakdown</p>
+      </div>
+
+      <!-- Heat Map -->
+      <div class="chart-card">
+        <h2>🔥 Heat Map</h2>
+        <p class="description">2D data visualization with color intensity mapping</p>
+        <div id="heatmap" class="chart-container"></div>
+        <p class="interactive-hint">Click cells to see values</p>
+      </div>
+
+      <!-- Radar Chart -->
+      <div class="chart-card">
+        <h2>🎯 Radar Chart</h2>
+        <p class="description">Compare multiple metrics across different dimensions</p>
+        <div id="radar" class="chart-container"></div>
+        <p class="interactive-hint">Multi-dataset comparison</p>
+      </div>
+
+      <!-- Funnel Chart -->
+      <div class="chart-card">
+        <h2>📉 Funnel Chart</h2>
+        <p class="description">Track conversion rates and drop-off through stages</p>
+        <div id="funnel" class="chart-container"></div>
+        <p class="interactive-hint">Click stages to interact</p>
+      </div>
+
+      <!-- Horizontal Bar Chart -->
+      <div class="chart-card">
+        <h2>➡️ Horizontal Bar Chart</h2>
+        <p class="description">Resource utilization metrics with tooltips</p>
+        <div id="horizontal-bar" class="chart-container"></div>
+        <p class="interactive-hint">Hover for details</p>
+      </div>
+
+      <!-- Vertical Bar Chart -->
+      <div class="chart-card">
+        <h2>📊 Vertical Bar Chart</h2>
+        <p class="description">Categorical data distributions</p>
+        <div id="vertical-bar" class="chart-container"></div>
+        <p class="interactive-hint">Hover over bars</p>
+      </div>
+
+      <!-- Multi-Line Chart -->
+      <div class="chart-card">
+        <h2>📈 Multi-Line Chart</h2>
+        <p class="description">Time-series with multiple data series</p>
+        <div id="multi-line" class="chart-container"></div>
+        <p class="interactive-hint">Move cursor over chart</p>
+      </div>
     </div>
 
-    <div class="chart-card">
-      <h2>Pie Chart (Donut)</h2>
-      <div id="pie" class="chart-container"></div>
-    </div>
-
-    <div class="chart-card">
-      <h2>Bar Chart</h2>
-      <div id="bar" class="chart-container"></div>
-    </div>
-
-    <div class="chart-card">
-      <h2>Progress Bar</h2>
-      <div id="progress" class="chart-container"></div>
-    </div>
+    <footer>
+      <p>
+        <strong>Micro Charts</strong> •
+        <a href="https://github.com/mango0422/micro-charts" target="_blank">GitHub</a> •
+        <a href="https://www.npmjs.com/package/@mango0422/micro-charts" target="_blank">npm</a>
+      </p>
+      <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+        Inspired by <a href="https://github.com/leeoniya/uPlot" target="_blank">uPlot</a> • MIT License
+      </p>
+    </footer>
   </div>
 
-  <script type="module">
-    // Import from built module (run `npm run build` first)
-    import { GaugeChart, PieChart, BarChart, ProgressBar, VERSION } from '../dist/index.js';
+  <!-- Load from local build (for testing) -->
+  <!-- <script src="../dist/index.global.js"></script> -->
+  <!-- Load from CDN (use after npm publish) -->
+  <script src="../dist/index.global.js"></script>
+   <!-- <script src="https://cdn.jsdelivr.net/npm/@mango0422/micro-charts@0.2.4/dist/index.global.js"></script> -->
 
-    console.log('Micro Charts version:', VERSION);
+  <script>
+    // Access via global MicroCharts object
+    const MC = MicroCharts;
+    const {
+      VERSION,
+      GaugeChart,
+      PieChart,
+      BarChart,
+      ProgressBar,
+      StackedBarChart,
+      HeatMap,
+      RadarChart,
+      FunnelChart,
+      HorizontalBarChart,
+      VerticalBarChart,
+      MultiLineChart
+    } = MC;
 
-    // Gauge Chart Example
+    // Display version
+    document.getElementById('version').textContent = VERSION;
+
+    // 1. Gauge Chart - CPU Usage
     const gauge = new GaugeChart(document.getElementById('gauge'), {
-      value: 75,
-      thresholds: { warning: 60, critical: 80 },
-      size: 180,
+      value: 68,
+      thresholds: { warning: 60, critical: 85 },
+      size: 200,
+      label: 'CPU Usage',
+      unit: '%',
     });
 
-    // Pie Chart Example (Donut mode)
+    // 2. Pie Chart - Request Status
     const pie = new PieChart(
       document.getElementById('pie'),
       [
-        { label: 'Chrome', value: 65 },
-        { label: 'Safari', value: 19 },
-        { label: 'Firefox', value: 10 },
-        { label: 'Edge', value: 4 },
-        { label: 'Other', value: 2 },
+        { label: 'Success', value: 850, color: '#10b981' },
+        { label: 'Warning', value: 120, color: '#f59e0b' },
+        { label: 'Error', value: 30, color: '#ef4444' },
       ],
       {
-        innerRadius: 0.5,
-        size: 180,
+        size: 200,
+        donut: true,
+        donutRatio: 0.6,
         showLabels: true,
+        onSliceClick: (index, slice) => {
+          console.log('Clicked:', slice.label, slice.value);
+        }
       }
     );
 
-    // Bar Chart Example
+    // 3. Bar Chart - Server Response Time
     const bar = new BarChart(
       document.getElementById('bar'),
       [
-        { label: 'Jan', value: 120 },
-        { label: 'Feb', value: 150 },
-        { label: 'Mar', value: 180 },
-        { label: 'Apr', value: 140 },
-        { label: 'May', value: 200 },
+        { label: 'us-east', value: 45 },
+        { label: 'us-west', value: 78 },
+        { label: 'eu-west', value: 62 },
+        { label: 'ap-south', value: 95 },
+        { label: 'ap-east', value: 38 },
       ],
       {
-        width: 300,
-        height: 180,
+        width: 340,
+        height: 200,
+        orientation: 'horizontal',
         showValues: true,
+        color: '#8b5cf6',
       }
     );
 
-    // Progress Bar Example
+    // 4. Progress Bar - Upload Progress
     const progress = new ProgressBar(document.getElementById('progress'), {
       value: 65,
-      width: 280,
-      height: 24,
+      width: 320,
+      height: 28,
+      color: '#3b82f6',
+      showPercentage: true,
     });
 
-    // Update charts periodically for demo
-    setInterval(() => {
-      gauge.setData(Math.floor(Math.random() * 100));
-    }, 3000);
+    // 5. Stacked Bar Chart - Network Traffic
+    const stackedBar = new StackedBarChart(
+      document.getElementById('stacked'),
+      {
+        categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        series: [
+          { label: 'Inbound', data: [120, 150, 180, 140, 200], color: '#3b82f6' },
+          { label: 'Outbound', data: [80, 90, 100, 95, 110], color: '#10b981' },
+          { label: 'Error', data: [5, 8, 3, 10, 6], color: '#ef4444' },
+        ],
+      },
+      {
+        width: 340,
+        height: 200,
+        showTotal: true,
+        showLegend: true,
+      }
+    );
 
+    // 6. Heat Map - Hourly Activity
+    const heatmap = new HeatMap(
+      document.getElementById('heatmap'),
+      {
+        rows: ['00:00', '06:00', '12:00', '18:00'],
+        columns: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        values: [
+          [20, 15, 18, 12, 25],
+          [45, 50, 42, 48, 52],
+          [85, 90, 95, 88, 92],
+          [60, 55, 58, 62, 65],
+        ],
+      },
+      {
+        width: 340,
+        height: 200,
+        colorScheme: 'sequential',
+        showValues: false,
+        colors: {
+          min: '#dbeafe',
+          max: '#1e40af',
+        },
+        onCellClick: (row, col, value) => {
+          console.log(`Clicked: ${row}, ${col} = ${value}`);
+        }
+      }
+    );
+
+    // 7. Radar Chart - Server Metrics Comparison
+    const radar = new RadarChart(
+      document.getElementById('radar'),
+      {
+        axes: [
+          { label: 'CPU', max: 100 },
+          { label: 'Memory', max: 100 },
+          { label: 'Disk', max: 100 },
+          { label: 'Network', max: 100 },
+          { label: 'Latency', max: 100 },
+        ],
+        datasets: [
+          {
+            label: 'Server A',
+            data: [75, 60, 85, 70, 80],
+            color: '#3b82f6',
+            fillOpacity: 0.25
+          },
+          {
+            label: 'Server B',
+            data: [55, 80, 65, 85, 60],
+            color: '#10b981',
+            fillOpacity: 0.25
+          },
+        ],
+      },
+      {
+        size: 240,
+        showGrid: true,
+        showLegend: true,
+      }
+    );
+
+    // 8. Funnel Chart - Packet Processing Pipeline
+    const funnel = new FunnelChart(
+      document.getElementById('funnel'),
+      [
+        { label: 'Received', value: 10000, color: '#3b82f6' },
+        { label: 'Validated', value: 9500, color: '#10b981' },
+        { label: 'Processed', value: 9200, color: '#8b5cf6' },
+        { label: 'Forwarded', value: 8800, color: '#f59e0b' },
+        { label: 'Delivered', value: 8500, color: '#10b981' },
+      ],
+      {
+        width: 340,
+        height: 240,
+        showPercentage: true,
+        orientation: 'vertical',
+        onStageClick: (index, stage) => {
+          console.log('Clicked stage:', stage.label, stage.value);
+        }
+      }
+    );
+
+    // Interactive: Click gauge to randomize
+    document.getElementById('gauge').addEventListener('click', () => {
+      gauge.setData(Math.floor(Math.random() * 100));
+    });
+
+    // Interactive: Auto-update progress
     setInterval(() => {
-      progress.setData(Math.floor(Math.random() * 100));
-    }, 2000);
+      const newValue = Math.floor(Math.random() * 100);
+      progress.setData(newValue);
+    }, 2500);
+
+    // Interactive: Click funnel to highlight
+    let funnelClickCount = 0;
+    document.getElementById('funnel').addEventListener('click', () => {
+      funnelClickCount++;
+      if (funnelClickCount % 3 === 0) {
+        // Refresh with new data
+        funnel.setData([
+          { label: 'Received', value: 10000 + Math.random() * 2000 },
+          { label: 'Validated', value: 9500 + Math.random() * 1000 },
+          { label: 'Processed', value: 9200 + Math.random() * 800 },
+          { label: 'Forwarded', value: 8800 + Math.random() * 600 },
+          { label: 'Delivered', value: 8500 + Math.random() * 500 },
+        ]);
+      }
+    });
+
+    // 9. Horizontal Bar Chart - CPU Core Usage
+    const hbar = new HorizontalBarChart(
+      document.getElementById('horizontal-bar'),
+      [
+        { label: 'Core 0', value: 45, color: '#22c55e' },
+        { label: 'Core 1', value: 78, color: '#f59e0b' },
+        { label: 'Core 2', value: 92, color: '#ef4444' },
+        { label: 'Core 3', value: 25, color: '#22c55e' },
+      ],
+      {
+        width: 340,
+        domain: [0, 100],
+        showGrid: true,
+        barHeight: 14,
+        labelWidth: 50,
+        valueFormatter: (v) => `${v.toFixed(0)}%`,
+        tooltip: {
+          formatter: (value, data) => `${data.label}: ${value.toFixed(1)}% Usage`,
+        },
+      }
+    );
+
+    // 10. Vertical Bar Chart - CPU Load Distribution
+    const vbar = new VerticalBarChart(
+      document.getElementById('vertical-bar'),
+      [
+        { label: '0-10%', value: 12, color: '#22c55e' },
+        { label: '10-30%', value: 8, color: '#84cc16' },
+        { label: '30-50%', value: 4, color: '#eab308' },
+        { label: '50-70%', value: 2, color: '#f59e0b' },
+        { label: '70-90%', value: 1, color: '#f97316' },
+        { label: '90%+', value: 1, color: '#ef4444' },
+      ],
+      {
+        width: 340,
+        height: 200,
+        allowDecimals: false,
+        showGrid: true,
+        barRadius: 4,
+        tooltip: {
+          formatter: (value, data) => `${data.label}: ${value} cores`,
+        },
+      }
+    );
+
+    // 11. Multi-Line Chart - Network Traffic
+    const now = Date.now();
+    const lineData = [];
+    for (let i = 0; i < 20; i++) {
+      lineData.push({
+        timestamp: now - (19 - i) * 60000,
+        eth0: 1000000 + Math.sin(i * 0.5) * 500000 + Math.random() * 200000,
+        eth1: 1800000 + Math.cos(i * 0.3) * 600000 + Math.random() * 300000,
+        bond0: 800000 + Math.sin(i * 0.8) * 300000 + Math.random() * 150000,
+      });
+    }
+
+    const multiLine = new MultiLineChart(
+      document.getElementById('multi-line'),
+      lineData,
+      {
+        width: 340,
+        height: 200,
+        series: [
+          { key: 'eth0', name: 'Interface 0', color: '#3b82f6' },
+          { key: 'eth1', name: 'Interface 1', color: '#22c55e' },
+          { key: 'bond0', name: 'Bond 0', color: '#f59e0b' },
+        ],
+        xAxis: {
+          tickFormatter: (ts) => new Date(ts).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }),
+          tickCount: 4,
+        },
+        yAxis: {
+          tickFormatter: (v) => `${(v / 1000000).toFixed(1)}M`,
+          width: 50,
+        },
+        tooltip: {
+          filter: (value) => value !== null && value > 0,
+          sort: (a, b) => b.value - a.value,
+          valueFormatter: (v) => `${(v / 1000000).toFixed(2)} Mbps`,
+          labelFormatter: (ts) => new Date(ts).toLocaleString(),
+        },
+        lineWidth: 2,
+        connectNulls: true,
+      }
+    );
+
+    console.log('Micro Charts loaded successfully!');
+    console.log('Version:', VERSION);
   </script>
 </body>
 </html>

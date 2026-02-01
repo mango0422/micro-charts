@@ -36,7 +36,7 @@ const DEFAULT_OPTIONS: Omit<RequiredProgressOptions, 'value'> = {
   color: '#3b82f6',
   backgroundColor: '#e5e7eb',
   showPercentage: true,
-  animate: true,
+  animate: false,
   duration: 400,
   borderRadius: 4,
 };

@@ -47,7 +47,7 @@ const DEFAULT_OPTIONS: RequiredPieOptions = {
   size: 200,
   innerRadius: 0,
   startAngle: -90,
-  animate: true,
+  animate: false,
   duration: 600,
   showLabels: false,
 };

@@ -113,7 +113,7 @@
     <header>
       <h1>📊 Micro Charts</h1>
       <p class="subtitle">Lightweight, zero-dependency chart library</p>
-      <p class="version">v<span id="version">0.2.1</span> • ~11KB gzipped</p>
+      <p class="version">v<span id="version">0.2.4</span> • ~15KB gzipped • 11 chart types</p>
     </header>
 
     <div class="chart-grid">
@@ -180,6 +180,30 @@
         <div id="funnel" class="chart-container"></div>
         <p class="interactive-hint">Click stages to interact</p>
       </div>
+
+      <!-- Horizontal Bar Chart -->
+      <div class="chart-card">
+        <h2>➡️ Horizontal Bar Chart</h2>
+        <p class="description">Resource utilization metrics with tooltips</p>
+        <div id="horizontal-bar" class="chart-container"></div>
+        <p class="interactive-hint">Hover for details</p>
+      </div>
+
+      <!-- Vertical Bar Chart -->
+      <div class="chart-card">
+        <h2>📊 Vertical Bar Chart</h2>
+        <p class="description">Categorical data distributions</p>
+        <div id="vertical-bar" class="chart-container"></div>
+        <p class="interactive-hint">Hover over bars</p>
+      </div>
+
+      <!-- Multi-Line Chart -->
+      <div class="chart-card">
+        <h2>📈 Multi-Line Chart</h2>
+        <p class="description">Time-series with multiple data series</p>
+        <div id="multi-line" class="chart-container"></div>
+        <p class="interactive-hint">Move cursor over chart</p>
+      </div>
     </div>
 
     <footer>
@@ -195,10 +219,9 @@
   </div>
 
   <!-- Load from local build (for testing) -->
-  <!-- <script src="../dist/index.global.js"></script> -->
+  <script src="../dist/index.global.js"></script>
   <!-- Load from CDN (use after npm publish) -->
-  <!-- <script src="https://unpkg.com/@mango0422/micro-charts@0.2.3/dist/index.global.js"></script> -->
-   <script src="https://cdn.jsdelivr.net/npm/@mango0422/micro-charts@0.2.3/dist/index.global.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@mango0422/micro-charts/dist/index.global.js"></script> -->
 
   <script>
     // Access via global MicroCharts object
@@ -212,7 +235,10 @@
       StackedBarChart,
       HeatMap,
       RadarChart,
-      FunnelChart
+      FunnelChart,
+      HorizontalBarChart,
+      VerticalBarChart,
+      MultiLineChart
     } = MC;
 
     // Display version
@@ -225,6 +251,7 @@
       size: 200,
       label: 'CPU Usage',
       unit: '%',
+      animate: true,
     });
 
     // 2. Pie Chart - Request Status
@@ -240,6 +267,7 @@
         donut: true,
         donutRatio: 0.6,
         showLabels: true,
+        animate: true,
         onSliceClick: (index, slice) => {
           console.log('Clicked:', slice.label, slice.value);
         }
@@ -262,6 +290,7 @@
         orientation: 'horizontal',
         showValues: true,
         color: '#8b5cf6',
+        animate: true,
       }
     );
 
@@ -272,6 +301,7 @@
       height: 28,
       color: '#3b82f6',
       showPercentage: true,
+      animate: true,
     });
 
     // 5. Stacked Bar Chart - Network Traffic
@@ -290,6 +320,7 @@
         height: 200,
         showTotal: true,
         showLegend: true,
+        animate: true,
       }
     );
 
@@ -311,6 +342,7 @@
         height: 200,
         colorScheme: 'sequential',
         showValues: false,
+        animate: true,
         colors: {
           min: '#dbeafe',
           max: '#1e40af',
@@ -351,6 +383,7 @@
         size: 240,
         showGrid: true,
         showLegend: true,
+        animate: true,
       }
     );
 
@@ -369,6 +402,7 @@
         height: 240,
         showPercentage: true,
         orientation: 'vertical',
+        animate: true,
         onStageClick: (index, stage) => {
           console.log('Clicked stage:', stage.label, stage.value);
         }
@@ -401,6 +435,100 @@
         ]);
       }
     });
+
+    // 9. Horizontal Bar Chart - CPU Core Usage
+    const hbar = new HorizontalBarChart(
+      document.getElementById('horizontal-bar'),
+      [
+        { label: 'Core 0', value: 45, color: '#22c55e' },
+        { label: 'Core 1', value: 78, color: '#f59e0b' },
+        { label: 'Core 2', value: 92, color: '#ef4444' },
+        { label: 'Core 3', value: 25, color: '#22c55e' },
+      ],
+      {
+        width: 340,
+        domain: [0, 100],
+        showGrid: true,
+        barHeight: 14,
+        labelWidth: 50,
+        animate: true,
+        valueFormatter: (v) => `${v.toFixed(0)}%`,
+        tooltip: {
+          formatter: (value, data) => `${data.label}: ${value.toFixed(1)}% Usage`,
+        },
+      }
+    );
+
+    // 10. Vertical Bar Chart - CPU Load Distribution
+    const vbar = new VerticalBarChart(
+      document.getElementById('vertical-bar'),
+      [
+        { label: '0-10%', value: 12, color: '#22c55e' },
+        { label: '10-30%', value: 8, color: '#84cc16' },
+        { label: '30-50%', value: 4, color: '#eab308' },
+        { label: '50-70%', value: 2, color: '#f59e0b' },
+        { label: '70-90%', value: 1, color: '#f97316' },
+        { label: '90%+', value: 1, color: '#ef4444' },
+      ],
+      {
+        width: 340,
+        height: 200,
+        allowDecimals: false,
+        showGrid: true,
+        barRadius: 4,
+        animate: true,
+        tooltip: {
+          formatter: (value, data) => `${data.label}: ${value} cores`,
+        },
+      }
+    );
+
+    // 11. Multi-Line Chart - Network Traffic
+    const now = Date.now();
+    const lineData = [];
+    for (let i = 0; i < 20; i++) {
+      lineData.push({
+        timestamp: now - (19 - i) * 60000,
+        eth0: 1000000 + Math.sin(i * 0.5) * 500000 + Math.random() * 200000,
+        eth1: 1800000 + Math.cos(i * 0.3) * 600000 + Math.random() * 300000,
+        bond0: 800000 + Math.sin(i * 0.8) * 300000 + Math.random() * 150000,
+      });
+    }
+
+    const multiLine = new MultiLineChart(
+      document.getElementById('multi-line'),
+      lineData,
+      {
+        width: 340,
+        height: 200,
+        animate: true,
+        series: [
+          { key: 'eth0', name: 'Interface 0', color: '#3b82f6' },
+          { key: 'eth1', name: 'Interface 1', color: '#22c55e' },
+          { key: 'bond0', name: 'Bond 0', color: '#f59e0b' },
+        ],
+        xAxis: {
+          tickFormatter: (ts) => new Date(ts).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }),
+          tickCount: 4,
+        },
+        yAxis: {
+          tickFormatter: (v) => `${(v / 1000000).toFixed(1)}M`,
+          width: 50,
+        },
+        tooltip: {
+          filter: (value) => value !== null && value > 0,
+          sort: (a, b) => b.value - a.value,
+          valueFormatter: (v) => `${(v / 1000000).toFixed(2)} Mbps`,
+          labelFormatter: (ts) => new Date(ts).toLocaleString(),
+        },
+        lineWidth: 2,
+        connectNulls: true,
+      }
+    );
 
     console.log('Micro Charts loaded successfully!');
     console.log('Version:', VERSION);

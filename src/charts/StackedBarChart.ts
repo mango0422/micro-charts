@@ -49,7 +49,7 @@ const DEFAULT_OPTIONS: RequiredStackedBarOptions = {
   showTotal: true,
   showLegend: true,
   showGrid: true,
-  animate: true,
+  animate: false,
   duration: 600,
   stacked100: false,
 };
