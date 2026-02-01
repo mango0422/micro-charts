@@ -370,7 +370,11 @@ export class FunnelChart {
 
         if (showValues) {
           ctx.font = `${FONT_SIZE_SM}px ${FONT_FAMILY}`;
-          ctx.fillText(stage.value.toString(), geom.centerX, textY);
+          // Format number: use toLocaleString for thousands separator, max 2 decimal places
+          const formattedValue = Number.isInteger(stage.value)
+            ? stage.value.toLocaleString()
+            : stage.value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+          ctx.fillText(formattedValue, geom.centerX, textY);
           textY += 14;
         }
 

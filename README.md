@@ -44,10 +44,15 @@ pnpm add @mango0422/micro-charts
 yarn add @mango0422/micro-charts
 ```
 
-### CDN (UMD)
+### CDN (IIFE)
 
 ```html
-<script src="https://unpkg.com/@mango0422/micro-charts"></script>
+<!-- jsdelivr (recommended - faster) -->
+<script src="https://cdn.jsdelivr.net/npm/@mango0422/micro-charts/dist/index.global.js"></script>
+
+<!-- unpkg (alternative) -->
+<!-- <script src="https://unpkg.com/@mango0422/micro-charts/dist/index.global.js"></script> -->
+
 <script>
   const { GaugeChart } = MicroCharts;
 </script>
