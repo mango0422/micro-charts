@@ -1,6 +1,6 @@
 {
   "name": "@mango0422/micro-charts",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Lightweight, zero-dependency chart library inspired by uPlot. Canvas-based, high performance.",
   "author": "mango0422",
   "license": "MIT",
@@ -149,9 +149,11 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && tsup --config tsup.iife.config.ts",
+    "build:esm": "tsup",
     "build:iife": "tsup --config tsup.iife.config.ts",
-    "dev": "NODE_ENV=development tsup --watch"
+    "dev": "NODE_ENV=development tsup --watch",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
