@@ -1,6 +1,6 @@
 {
   "name": "@mango0422/micro-charts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Lightweight, zero-dependency chart library inspired by uPlot. Canvas-based, high performance.",
   "author": "mango0422",
   "license": "MIT",
