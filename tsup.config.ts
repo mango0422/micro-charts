@@ -20,6 +20,9 @@ export default defineConfig({
     'src/bubble.ts',        // BubbleChart only
     'src/waterfall.ts',     // WaterfallChart only
     'src/boxplot.ts',       // BoxPlot only
+    'src/radial-progress.ts', // RadialProgress only
+    'src/mini-chart.ts',    // MiniChart only
+    'src/bullet.ts',        // BulletChart only
     'src/colors.ts',        // Color utilities only
     'src/easing.ts',        // Easing functions only
   ],

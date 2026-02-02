@@ -82,3 +82,12 @@ export type { WaterfallData, WaterfallChartOptions } from './charts/WaterfallCha
 
 export { BoxPlot, calculateBoxPlotStats } from './charts/BoxPlot';
 export type { BoxPlotData, BoxPlotOptions } from './charts/BoxPlot';
+
+export { RadialProgress } from './charts/RadialProgress';
+export type { RadialProgressOptions } from './charts/RadialProgress';
+
+export { MiniChart } from './charts/MiniChart';
+export type { MiniChartOptions } from './charts/MiniChart';
+
+export { BulletChart } from './charts/BulletChart';
+export type { BulletChartOptions, BulletRange } from './charts/BulletChart';

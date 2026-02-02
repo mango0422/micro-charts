@@ -27,7 +27,12 @@
     "bubble",
     "waterfall",
     "boxplot",
-    "statistics"
+    "statistics",
+    "radial-progress",
+    "mini-chart",
+    "sparkline",
+    "bullet-chart",
+    "kpi"
   ],
   "repository": {
     "type": "git",
@@ -209,6 +214,36 @@
       "require": {
         "types": "./dist/boxplot.d.ts",
         "default": "./dist/boxplot.cjs"
+      }
+    },
+    "./radial-progress": {
+      "import": {
+        "types": "./dist/radial-progress.d.ts",
+        "default": "./dist/radial-progress.js"
+      },
+      "require": {
+        "types": "./dist/radial-progress.d.ts",
+        "default": "./dist/radial-progress.cjs"
+      }
+    },
+    "./mini-chart": {
+      "import": {
+        "types": "./dist/mini-chart.d.ts",
+        "default": "./dist/mini-chart.js"
+      },
+      "require": {
+        "types": "./dist/mini-chart.d.ts",
+        "default": "./dist/mini-chart.cjs"
+      }
+    },
+    "./bullet": {
+      "import": {
+        "types": "./dist/bullet.d.ts",
+        "default": "./dist/bullet.js"
+      },
+      "require": {
+        "types": "./dist/bullet.d.ts",
+        "default": "./dist/bullet.cjs"
       }
     }
   },
