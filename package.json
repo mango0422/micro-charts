@@ -23,7 +23,11 @@
     "horizontal-bar",
     "vertical-bar",
     "multi-line",
-    "time-series"
+    "time-series",
+    "bubble",
+    "waterfall",
+    "boxplot",
+    "statistics"
   ],
   "repository": {
     "type": "git",
@@ -175,6 +179,36 @@
       "require": {
         "types": "./dist/multi-line.d.ts",
         "default": "./dist/multi-line.cjs"
+      }
+    },
+    "./bubble": {
+      "import": {
+        "types": "./dist/bubble.d.ts",
+        "default": "./dist/bubble.js"
+      },
+      "require": {
+        "types": "./dist/bubble.d.ts",
+        "default": "./dist/bubble.cjs"
+      }
+    },
+    "./waterfall": {
+      "import": {
+        "types": "./dist/waterfall.d.ts",
+        "default": "./dist/waterfall.js"
+      },
+      "require": {
+        "types": "./dist/waterfall.d.ts",
+        "default": "./dist/waterfall.cjs"
+      }
+    },
+    "./boxplot": {
+      "import": {
+        "types": "./dist/boxplot.d.ts",
+        "default": "./dist/boxplot.js"
+      },
+      "require": {
+        "types": "./dist/boxplot.d.ts",
+        "default": "./dist/boxplot.cjs"
       }
     }
   },

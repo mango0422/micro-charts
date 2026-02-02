@@ -74,3 +74,11 @@ export type { VerticalBarData, VerticalBarChartOptions } from './charts/Vertical
 export { MultiLineChart } from './charts/MultiLineChart';
 export type { MultiLineData, ColumnBasedData, SeriesConfig, MultiLineChartOptions } from './charts/MultiLineChart';
 
+export { BubbleChart } from './charts/BubbleChart';
+export type { BubbleData, BubbleChartOptions } from './charts/BubbleChart';
+
+export { WaterfallChart } from './charts/WaterfallChart';
+export type { WaterfallData, WaterfallChartOptions } from './charts/WaterfallChart';
+
+export { BoxPlot, calculateBoxPlotStats } from './charts/BoxPlot';
+export type { BoxPlotData, BoxPlotOptions } from './charts/BoxPlot';

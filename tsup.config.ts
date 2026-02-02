@@ -17,6 +17,9 @@ export default defineConfig({
     'src/horizontal-bar.ts', // HorizontalBarChart only
     'src/vertical-bar.ts',  // VerticalBarChart only
     'src/multi-line.ts',    // MultiLineChart only
+    'src/bubble.ts',        // BubbleChart only
+    'src/waterfall.ts',     // WaterfallChart only
+    'src/boxplot.ts',       // BoxPlot only
     'src/colors.ts',        // Color utilities only
     'src/easing.ts',        // Easing functions only
   ],
