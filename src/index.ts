@@ -33,6 +33,17 @@ export { animate, easing } from './core/animation';
 export type { EasingFn } from './core/animation';
 
 export {
+    configureDefaults,
+    getConfig,
+    resetConfig,
+    isAnimationDisabled,
+} from './core/config';
+export type { GlobalConfig } from './core/config';
+
+export { CanvasTooltip, createTooltipContent } from './core/tooltip';
+export type { TooltipPosition, TooltipLine, CanvasTooltipOptions } from './core/tooltip';
+
+export {
     defaultColors,
     generateColorPalette,
     hexToRgb,

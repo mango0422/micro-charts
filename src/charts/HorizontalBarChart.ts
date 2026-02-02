@@ -14,6 +14,8 @@ import { CanvasRenderer } from '../core/canvas';
 import { animate, scheduleRender } from '../core/animation';
 import { generateColorPalette } from '../core/colors';
 import { COLOR_GRID, COLOR_TEXT, FONT_FAMILY, FONT_SIZE_SM } from '../core/constants';
+import { useCanvasTooltips } from '../core/config';
+import { CanvasTooltip, type TooltipLine } from '../core/tooltip';
 import type { AnimationController } from '../types';
 
 export interface HorizontalBarData {
@@ -100,6 +102,7 @@ export class HorizontalBarChart {
   private animationController?: AnimationController;
   private resizeObserver?: ResizeObserver;
   private tooltipEl?: HTMLDivElement;
+  private canvasTooltip?: CanvasTooltip;
 
   // Cached layout values
   private _chartW = 0;
@@ -133,6 +136,11 @@ export class HorizontalBarChart {
     this.canvas.style.cursor = 'pointer';
     container.appendChild(this.canvas);
     this.renderer = new CanvasRenderer(this.canvas, this.options.width, this.options.height);
+
+    // Initialize canvas tooltip if enabled
+    if (useCanvasTooltips()) {
+      this.canvasTooltip = new CanvasTooltip(this.renderer.ctx);
+    }
 
     this.setupEventListeners();
     this.setupResizeObserver();
@@ -279,6 +287,12 @@ export class HorizontalBarChart {
     if (height !== undefined) this.options.height = height;
     this.renderer.resize(this.options.width, this.options.height);
     this.resetStyleCache();
+
+    // Update canvas tooltip dimensions
+    if (this.canvasTooltip) {
+      this.canvasTooltip.updateDimensions(this.canvas.width, this.canvas.height);
+    }
+
     this.updateLayout();
     this.batchRender();
   }
@@ -394,6 +408,11 @@ export class HorizontalBarChart {
         ctx.fillText(valueText, valueX, valueY);
       }
     }
+
+    // Render canvas tooltip if enabled
+    if (this.canvasTooltip) {
+      this.canvasTooltip.render();
+    }
   }
 
   // === Event handling ===
@@ -435,10 +454,15 @@ export class HorizontalBarChart {
           this.options.onBarHover(null, -1);
         }
       }
-    } else if (hoveredIndex >= 0 && this.tooltipEl) {
+    } else if (hoveredIndex >= 0) {
       // Update tooltip position
-      this.tooltipEl.style.left = `${e.clientX + 10}px`;
-      this.tooltipEl.style.top = `${e.clientY + 10}px`;
+      if (this.canvasTooltip) {
+        const data = this._barRects[hoveredIndex]!.data;
+        this.showTooltip(e.clientX, e.clientY, data);
+      } else if (this.tooltipEl) {
+        this.tooltipEl.style.left = `${e.clientX + 10}px`;
+        this.tooltipEl.style.top = `${e.clientY + 10}px`;
+      }
     }
   };
 
@@ -464,6 +488,38 @@ export class HorizontalBarChart {
   private showTooltip(x: number, y: number, data: HorizontalBarData): void {
     if (this.options.tooltip === false) return;
 
+    // Use canvas tooltip if enabled
+    if (this.canvasTooltip) {
+      const rect = this.canvas.getBoundingClientRect();
+      const canvasX = (x - rect.left) * (this.canvas.width / rect.width);
+      const canvasY = (y - rect.top) * (this.canvas.height / rect.height);
+
+      let lines: TooltipLine[];
+
+      if (this.options.tooltip.content) {
+        const tooltipContent = this.options.tooltip.content(data);
+        lines = [];
+        if (tooltipContent.title) {
+          lines.push({ text: tooltipContent.title, bold: true });
+        }
+        for (const line of tooltipContent.lines) {
+          lines.push({
+            text: `${line.label}: ${line.value}`,
+            color: line.color,
+          });
+        }
+      } else if (this.options.tooltip.formatter) {
+        lines = [{ text: this.options.tooltip.formatter(data.value, data) }];
+      } else {
+        lines = [{ text: `${data.label}: ${data.value.toFixed(1)}%` }];
+      }
+
+      this.canvasTooltip.show({ x: canvasX, y: canvasY }, lines);
+      this.batchRender();
+      return;
+    }
+
+    // DOM-based tooltip fallback
     if (!this.tooltipEl) {
       this.tooltipEl = document.createElement('div');
       this.tooltipEl.style.position = 'fixed';
@@ -523,6 +579,10 @@ export class HorizontalBarChart {
   }
 
   private hideTooltip(): void {
+    if (this.canvasTooltip) {
+      this.canvasTooltip.hide();
+      this.batchRender();
+    }
     if (this.tooltipEl) {
       this.tooltipEl.style.display = 'none';
     }

@@ -14,6 +14,8 @@ import { CanvasRenderer } from '../core/canvas';
 import { animate, scheduleRender } from '../core/animation';
 import { generateColorPalette } from '../core/colors';
 import { COLOR_GRID, COLOR_TEXT, FONT_FAMILY, FONT_SIZE_SM } from '../core/constants';
+import { useCanvasTooltips } from '../core/config';
+import { CanvasTooltip } from '../core/tooltip';
 import type { AnimationController } from '../types';
 
 export interface VerticalBarData {
@@ -89,6 +91,7 @@ export class VerticalBarChart {
   private animationController?: AnimationController;
   private resizeObserver?: ResizeObserver;
   private tooltipEl?: HTMLDivElement;
+  private canvasTooltip?: CanvasTooltip;
 
   // Cached layout values
   private _chartW = 0;
@@ -120,6 +123,11 @@ export class VerticalBarChart {
     this.canvas.style.cursor = 'pointer';
     container.appendChild(this.canvas);
     this.renderer = new CanvasRenderer(this.canvas, this.options.width, this.options.height);
+
+    // Initialize canvas tooltip if enabled
+    if (useCanvasTooltips()) {
+      this.canvasTooltip = new CanvasTooltip(this.renderer.ctx);
+    }
 
     this.setupEventListeners();
     this.setupResizeObserver();
@@ -274,6 +282,12 @@ export class VerticalBarChart {
     if (height !== undefined) this.options.height = height;
     this.renderer.resize(this.options.width, this.options.height);
     this.resetStyleCache();
+
+    // Update canvas tooltip dimensions
+    if (this.canvasTooltip) {
+      this.canvasTooltip.updateDimensions(this.canvas.width, this.canvas.height);
+    }
+
     this.updateLayout();
     this.batchRender();
   }
@@ -381,6 +395,11 @@ export class VerticalBarChart {
 
       ctx.fillText(d.label, labelX, labelY);
     }
+
+    // Render canvas tooltip if enabled
+    if (this.canvasTooltip) {
+      this.canvasTooltip.render();
+    }
   }
 
   // === Event handling ===
@@ -422,10 +441,15 @@ export class VerticalBarChart {
           this.options.onBarHover(null, -1);
         }
       }
-    } else if (hoveredIndex >= 0 && this.tooltipEl) {
+    } else if (hoveredIndex >= 0) {
       // Update tooltip position
-      this.tooltipEl.style.left = `${e.clientX + 10}px`;
-      this.tooltipEl.style.top = `${e.clientY - 30}px`;
+      if (this.canvasTooltip) {
+        const data = this._barRects[hoveredIndex]!.data;
+        this.showTooltip(e.clientX, e.clientY, data);
+      } else if (this.tooltipEl) {
+        this.tooltipEl.style.left = `${e.clientX + 10}px`;
+        this.tooltipEl.style.top = `${e.clientY - 30}px`;
+      }
     }
   };
 
@@ -451,6 +475,22 @@ export class VerticalBarChart {
   private showTooltip(x: number, y: number, data: VerticalBarData): void {
     if (this.options.tooltip === false) return;
 
+    const tooltipText = this.options.tooltip.formatter
+      ? this.options.tooltip.formatter(data.value, data)
+      : `${data.label}: ${this.options.allowDecimals ? data.value.toFixed(1) : data.value.toString()}`;
+
+    // Use canvas tooltip if enabled
+    if (this.canvasTooltip) {
+      const rect = this.canvas.getBoundingClientRect();
+      const canvasX = (x - rect.left) * (this.canvas.width / rect.width);
+      const canvasY = (y - rect.top) * (this.canvas.height / rect.height);
+
+      this.canvasTooltip.show({ x: canvasX, y: canvasY }, tooltipText);
+      this.batchRender();
+      return;
+    }
+
+    // DOM-based tooltip fallback
     if (!this.tooltipEl) {
       this.tooltipEl = document.createElement('div');
       this.tooltipEl.style.position = 'fixed';
@@ -466,21 +506,17 @@ export class VerticalBarChart {
     }
 
     // Clear previous content (XSS safe)
-    this.tooltipEl.textContent = '';
-
-    if (this.options.tooltip.formatter) {
-      // Use textContent for user-provided formatter output (XSS safe)
-      this.tooltipEl.textContent = this.options.tooltip.formatter(data.value, data);
-    } else {
-      const valueStr = this.options.allowDecimals ? data.value.toFixed(1) : data.value.toString();
-      this.tooltipEl.textContent = `${data.label}: ${valueStr}`;
-    }
+    this.tooltipEl.textContent = tooltipText;
     this.tooltipEl.style.left = `${x + 10}px`;
     this.tooltipEl.style.top = `${y - 30}px`;
     this.tooltipEl.style.display = 'block';
   }
 
   private hideTooltip(): void {
+    if (this.canvasTooltip) {
+      this.canvasTooltip.hide();
+      this.batchRender();
+    }
     if (this.tooltipEl) {
       this.tooltipEl.style.display = 'none';
     }

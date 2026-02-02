@@ -15,6 +15,8 @@ import { CanvasRenderer } from '../core/canvas';
 import { animate, scheduleRender } from '../core/animation';
 import { COLOR_GRID, COLOR_TEXT, FONT_FAMILY, FONT_SIZE_SM } from '../core/constants';
 import { decimateMultiSeries, type DecimationOptions } from '../core/decimation';
+import { useCanvasTooltips } from '../core/config';
+import { CanvasTooltip, type TooltipLine } from '../core/tooltip';
 import type { AnimationController } from '../types';
 
 /**
@@ -144,6 +146,7 @@ export class MultiLineChart {
   private animationController?: AnimationController;
   private resizeObserver?: ResizeObserver;
   private tooltipEl?: HTMLDivElement;
+  private canvasTooltip?: CanvasTooltip;
 
   // Cached layout values
   private _chartX = 0;
@@ -189,6 +192,11 @@ export class MultiLineChart {
     this.canvas.style.cursor = 'crosshair';
     container.appendChild(this.canvas);
     this.renderer = new CanvasRenderer(this.canvas, this.options.width, this.options.height);
+
+    // Initialize canvas tooltip if enabled
+    if (useCanvasTooltips()) {
+      this.canvasTooltip = new CanvasTooltip(this.renderer.ctx);
+    }
 
     this.setupEventListeners();
     this.setupResizeObserver();
@@ -493,6 +501,12 @@ export class MultiLineChart {
     if (height !== undefined) this.options.height = height;
     this.renderer.resize(this.options.width, this.options.height);
     this.resetStyleCache();
+
+    // Update canvas tooltip dimensions
+    if (this.canvasTooltip) {
+      this.canvasTooltip.updateDimensions(this.canvas.width, this.canvas.height);
+    }
+
     this.updateLayout();
     this.batchRender();
   }
@@ -619,6 +633,11 @@ export class MultiLineChart {
         }
       }
     }
+
+    // Render canvas tooltip if enabled
+    if (this.canvasTooltip) {
+      this.canvasTooltip.render();
+    }
   }
 
   // === Event handling ===
@@ -652,10 +671,17 @@ export class MultiLineChart {
           this.options.onPointHover(null, -1);
         }
       }
-    } else if (hoveredIndex >= 0 && this.tooltipEl) {
+    } else if (hoveredIndex >= 0) {
       // Update tooltip position
-      this.tooltipEl.style.left = `${e.clientX + 10}px`;
-      this.tooltipEl.style.top = `${e.clientY + 10}px`;
+      if (this.canvasTooltip) {
+        const data = this.columnToRow(hoveredIndex);
+        if (data) {
+          this.showTooltip(e.clientX, e.clientY, data);
+        }
+      } else if (this.tooltipEl) {
+        this.tooltipEl.style.left = `${e.clientX + 10}px`;
+        this.tooltipEl.style.top = `${e.clientY + 10}px`;
+      }
     }
   };
 
@@ -699,36 +725,12 @@ export class MultiLineChart {
   private showTooltip(x: number, y: number, data: MultiLineData): void {
     if (this.options.tooltip === false) return;
 
-    if (!this.tooltipEl) {
-      this.tooltipEl = document.createElement('div');
-      this.tooltipEl.style.position = 'fixed';
-      this.tooltipEl.style.background = 'rgba(0, 0, 0, 0.9)';
-      this.tooltipEl.style.color = '#fff';
-      this.tooltipEl.style.padding = '8px 12px';
-      this.tooltipEl.style.borderRadius = '4px';
-      this.tooltipEl.style.fontSize = '12px';
-      this.tooltipEl.style.pointerEvents = 'none';
-      this.tooltipEl.style.zIndex = '9999';
-      this.tooltipEl.style.maxHeight = '300px';
-      this.tooltipEl.style.overflowY = 'auto';
-      document.body.appendChild(this.tooltipEl);
-    }
-
     const tooltip = this.options.tooltip;
 
-    // Clear previous content (XSS safe)
-    this.tooltipEl.textContent = '';
-
-    // Label (timestamp) - using DOM API for XSS safety
+    // Label (timestamp)
     const labelText = tooltip.labelFormatter
       ? tooltip.labelFormatter(data.timestamp)
       : new Date(data.timestamp).toLocaleString();
-
-    const labelDiv = document.createElement('div');
-    labelDiv.style.fontWeight = 'bold';
-    labelDiv.style.marginBottom = '6px';
-    labelDiv.textContent = labelText;
-    this.tooltipEl.appendChild(labelDiv);
 
     // Collect entries
     const entries: TooltipEntry[] = [];
@@ -754,6 +756,55 @@ export class MultiLineChart {
     if (tooltip.sort) {
       entries.sort(tooltip.sort);
     }
+
+    // Use canvas tooltip if enabled
+    if (this.canvasTooltip) {
+      // Convert to canvas position (account for DPI scaling)
+      const rect = this.canvas.getBoundingClientRect();
+      const canvasX = (x - rect.left) * (this.canvas.width / rect.width);
+      const canvasY = (y - rect.top) * (this.canvas.height / rect.height);
+
+      const lines: TooltipLine[] = [{ text: labelText, bold: true }];
+
+      for (const entry of entries) {
+        const valueText = tooltip.valueFormatter
+          ? tooltip.valueFormatter(entry.value, entry.key)
+          : entry.value.toFixed(1);
+        lines.push({
+          text: `${entry.name}: ${valueText}`,
+          color: entry.color,
+        });
+      }
+
+      this.canvasTooltip.show({ x: canvasX, y: canvasY }, lines);
+      this.batchRender(); // Re-render to show tooltip
+      return;
+    }
+
+    // DOM-based tooltip fallback
+    if (!this.tooltipEl) {
+      this.tooltipEl = document.createElement('div');
+      this.tooltipEl.style.position = 'fixed';
+      this.tooltipEl.style.background = 'rgba(0, 0, 0, 0.9)';
+      this.tooltipEl.style.color = '#fff';
+      this.tooltipEl.style.padding = '8px 12px';
+      this.tooltipEl.style.borderRadius = '4px';
+      this.tooltipEl.style.fontSize = '12px';
+      this.tooltipEl.style.pointerEvents = 'none';
+      this.tooltipEl.style.zIndex = '9999';
+      this.tooltipEl.style.maxHeight = '300px';
+      this.tooltipEl.style.overflowY = 'auto';
+      document.body.appendChild(this.tooltipEl);
+    }
+
+    // Clear previous content (XSS safe)
+    this.tooltipEl.textContent = '';
+
+    const labelDiv = document.createElement('div');
+    labelDiv.style.fontWeight = 'bold';
+    labelDiv.style.marginBottom = '6px';
+    labelDiv.textContent = labelText;
+    this.tooltipEl.appendChild(labelDiv);
 
     // Render entries using DOM API (XSS safe)
     for (const entry of entries) {
@@ -786,6 +837,10 @@ export class MultiLineChart {
   }
 
   private hideTooltip(): void {
+    if (this.canvasTooltip) {
+      this.canvasTooltip.hide();
+      this.batchRender(); // Re-render to hide tooltip
+    }
     if (this.tooltipEl) {
       this.tooltipEl.style.display = 'none';
     }

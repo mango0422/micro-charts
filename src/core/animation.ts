@@ -4,6 +4,7 @@
 
 import type { EasingFunction, AnimationController } from '../types';
 import { isBrowser } from '../types';
+import { isAnimationDisabled } from './config';
 
 // Re-export types for backwards compatibility
 export type { AnimationController, EasingFunction } from '../types';
@@ -104,8 +105,8 @@ export function animate(
   onComplete?: () => void,
   easingFn: EasingFunction = easing.easeInOutQuad
 ): AnimationController {
-  // SSR safety: immediately complete animation in non-browser environment
-  if (!isBrowser || !globalScheduler) {
+  // Skip animation if globally disabled, SSR, or non-browser environment
+  if (!isBrowser || !globalScheduler || isAnimationDisabled()) {
     onUpdate(to);
     onComplete?.();
     return NOOP_CONTROLLER;
