@@ -74,6 +74,9 @@ export type { VerticalBarData, VerticalBarChartOptions } from './charts/Vertical
 export { MultiLineChart } from './charts/MultiLineChart';
 export type { MultiLineData, ColumnBasedData, SeriesConfig, MultiLineChartOptions } from './charts/MultiLineChart';
 
+export { lttbDecimate, decimateMultiSeries } from './core/decimation';
+export type { DecimationOptions } from './core/decimation';
+
 export { BubbleChart } from './charts/BubbleChart';
 export type { BubbleData, BubbleChartOptions } from './charts/BubbleChart';
 

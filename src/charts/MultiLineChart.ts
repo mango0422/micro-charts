@@ -14,6 +14,7 @@
 import { CanvasRenderer } from '../core/canvas';
 import { animate, scheduleRender } from '../core/animation';
 import { COLOR_GRID, COLOR_TEXT, FONT_FAMILY, FONT_SIZE_SM } from '../core/constants';
+import { decimateMultiSeries, type DecimationOptions } from '../core/decimation';
 import type { AnimationController } from '../types';
 
 /**
@@ -87,13 +88,15 @@ export interface MultiLineChartOptions {
   showGrid?: boolean;
   gridDash?: number[];
   tooltip?: TooltipConfig | false;
+  decimation?: DecimationOptions;
   animate?: boolean;
   duration?: number;
   onPointHover?: (data: MultiLineData | null, index: number) => void;
 }
 
-type RequiredOptions = Required<Omit<MultiLineChartOptions, 'tooltip' | 'onPointHover' | 'xAxis' | 'yAxis' | 'defaultColors'>> & {
+type RequiredOptions = Required<Omit<MultiLineChartOptions, 'tooltip' | 'onPointHover' | 'xAxis' | 'yAxis' | 'defaultColors' | 'decimation'>> & {
   tooltip: TooltipConfig | false;
+  decimation: DecimationOptions;
   onPointHover?: (data: MultiLineData | null, index: number) => void;
   xAxis: Required<Omit<XAxisConfig, 'tickFormatter'>> & Pick<XAxisConfig, 'tickFormatter'>;
   yAxis: Required<Omit<YAxisConfig, 'tickFormatter'>> & Pick<YAxisConfig, 'tickFormatter'>;
@@ -121,6 +124,7 @@ const DEFAULT_OPTIONS: RequiredOptions = {
   showGrid: true,
   gridDash: [3, 3],
   tooltip: false,
+  decimation: { enabled: false, threshold: 500 },
   animate: false,
   duration: 500,
 };
@@ -178,6 +182,7 @@ export class MultiLineChart {
       xAxis: { ...DEFAULT_OPTIONS.xAxis, ...options.xAxis },
       yAxis: { ...DEFAULT_OPTIONS.yAxis, ...options.yAxis },
       margin: { ...DEFAULT_OPTIONS.margin, ...options.margin },
+      decimation: { ...DEFAULT_OPTIONS.decimation, ...options.decimation },
     };
 
     this.canvas = document.createElement('canvas');
@@ -293,15 +298,25 @@ export class MultiLineChart {
 
   /** Cache layout calculations */
   private updateLayout(): void {
-    const { width, height, margin, series, yAxis } = this.options;
+    const { width, height, margin, series, yAxis, decimation } = this.options;
 
     this._chartX = margin.left;
     this._chartY = margin.top;
     this._chartW = width - margin.left - margin.right;
     this._chartH = height - margin.top - margin.bottom;
 
+    // Apply decimation if enabled and threshold exceeded
+    let workingData = this.columnData;
+    if (decimation.enabled && this.columnData.timestamps.length > (decimation.threshold ?? 500)) {
+      workingData = decimateMultiSeries(
+        this.columnData.timestamps,
+        this.columnData.series,
+        decimation.threshold ?? 500
+      );
+    }
+
     // Use columnar data directly (already sorted by timestamp during conversion)
-    const { timestamps } = this.columnData;
+    const { timestamps } = workingData;
 
     // Create sorted index array based on timestamps
     const indices = new Array(timestamps.length);
@@ -323,14 +338,14 @@ export class MultiLineChart {
     // Calculate X range
     this._xRange = [this._timestamps[0]!, this._timestamps[this._timestamps.length - 1]!];
 
-    // Process each series using columnar data
+    // Process each series using columnar data (possibly decimated)
     this._processedSeries = [];
     let yMin = Infinity;
     let yMax = -Infinity;
 
     for (let seriesIdx = 0; seriesIdx < series.length; seriesIdx++) {
       const config = series[seriesIdx]!;
-      const seriesData = this.columnData.series[config.key];
+      const seriesData = workingData.series[config.key];
       const values: (number | null)[] = [];
       const points: Array<{ x: number; y: number; value: number }> = [];
 
@@ -459,6 +474,7 @@ export class MultiLineChart {
     if (options.showGrid !== undefined) this.options.showGrid = options.showGrid;
     if (options.gridDash !== undefined) this.options.gridDash = options.gridDash;
     if (options.tooltip !== undefined) this.options.tooltip = options.tooltip;
+    if (options.decimation !== undefined) this.options.decimation = { ...this.options.decimation, ...options.decimation };
     if (options.animate !== undefined) this.options.animate = options.animate;
     if (options.duration !== undefined) this.options.duration = options.duration;
     if (options.onPointHover !== undefined) this.options.onPointHover = options.onPointHover;

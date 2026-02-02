@@ -256,6 +256,10 @@
     "build:esm": "tsup",
     "build:iife": "tsup --config tsup.iife.config.ts",
     "dev": "NODE_ENV=development tsup --watch",
+    "size": "node scripts/bundle-size.js",
+    "size:json": "node scripts/bundle-size.js --json",
+    "bench": "node scripts/benchmark.js",
+    "bench:quick": "node scripts/benchmark.js --quick",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
