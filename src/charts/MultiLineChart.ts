@@ -699,14 +699,20 @@ export class MultiLineChart {
     }
 
     const tooltip = this.options.tooltip;
-    let content = '';
 
-    // Label (timestamp)
+    // Clear previous content (XSS safe)
+    this.tooltipEl.textContent = '';
+
+    // Label (timestamp) - using DOM API for XSS safety
     const labelText = tooltip.labelFormatter
       ? tooltip.labelFormatter(data.timestamp)
       : new Date(data.timestamp).toLocaleString();
 
-    content += `<div style="font-weight: bold; margin-bottom: 6px;">${labelText}</div>`;
+    const labelDiv = document.createElement('div');
+    labelDiv.style.fontWeight = 'bold';
+    labelDiv.style.marginBottom = '6px';
+    labelDiv.textContent = labelText;
+    this.tooltipEl.appendChild(labelDiv);
 
     // Collect entries
     const entries: TooltipEntry[] = [];
@@ -733,17 +739,31 @@ export class MultiLineChart {
       entries.sort(tooltip.sort);
     }
 
-    // Render entries
+    // Render entries using DOM API (XSS safe)
     for (const entry of entries) {
       const valueText = tooltip.valueFormatter
         ? tooltip.valueFormatter(entry.value, entry.key)
         : entry.value.toFixed(1);
 
-      const colorDot = `<span style="display: inline-block; width: 8px; height: 8px; background: ${entry.color}; border-radius: 50%; margin-right: 6px;"></span>`;
-      content += `<div style="margin-bottom: 2px;">${colorDot}${entry.name}: ${valueText}</div>`;
-    }
+      const entryDiv = document.createElement('div');
+      entryDiv.style.marginBottom = '2px';
 
-    this.tooltipEl.innerHTML = content;
+      // Color dot
+      const colorDot = document.createElement('span');
+      colorDot.style.display = 'inline-block';
+      colorDot.style.width = '8px';
+      colorDot.style.height = '8px';
+      colorDot.style.background = entry.color;
+      colorDot.style.borderRadius = '50%';
+      colorDot.style.marginRight = '6px';
+      entryDiv.appendChild(colorDot);
+
+      // Text content
+      const textNode = document.createTextNode(`${entry.name}: ${valueText}`);
+      entryDiv.appendChild(textNode);
+
+      this.tooltipEl.appendChild(entryDiv);
+    }
     this.tooltipEl.style.left = `${x + 10}px`;
     this.tooltipEl.style.top = `${y + 10}px`;
     this.tooltipEl.style.display = 'block';

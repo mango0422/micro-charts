@@ -478,24 +478,45 @@ export class HorizontalBarChart {
       document.body.appendChild(this.tooltipEl);
     }
 
-    let content = '';
+    // Clear previous content (XSS safe)
+    this.tooltipEl.textContent = '';
 
     if (this.options.tooltip.content) {
       const tooltipContent = this.options.tooltip.content(data);
+
+      // Build tooltip using DOM API (XSS safe)
       if (tooltipContent.title) {
-        content += `<div style="font-weight: bold; margin-bottom: 4px;">${tooltipContent.title}</div>`;
+        const titleDiv = document.createElement('div');
+        titleDiv.style.fontWeight = 'bold';
+        titleDiv.style.marginBottom = '4px';
+        titleDiv.textContent = tooltipContent.title;
+        this.tooltipEl.appendChild(titleDiv);
       }
+
+      const tooltipEl = this.tooltipEl;
       tooltipContent.lines.forEach(line => {
-        const colorDot = line.color ? `<span style="display: inline-block; width: 8px; height: 8px; background: ${line.color}; border-radius: 50%; margin-right: 6px;"></span>` : '';
-        content += `<div>${colorDot}${line.label}: ${line.value}</div>`;
+        const lineDiv = document.createElement('div');
+
+        if (line.color) {
+          const colorDot = document.createElement('span');
+          colorDot.style.display = 'inline-block';
+          colorDot.style.width = '8px';
+          colorDot.style.height = '8px';
+          colorDot.style.background = line.color;
+          colorDot.style.borderRadius = '50%';
+          colorDot.style.marginRight = '6px';
+          lineDiv.appendChild(colorDot);
+        }
+
+        const textNode = document.createTextNode(`${line.label}: ${line.value}`);
+        lineDiv.appendChild(textNode);
+        tooltipEl.appendChild(lineDiv);
       });
     } else if (this.options.tooltip.formatter) {
-      content = this.options.tooltip.formatter(data.value, data);
+      this.tooltipEl.textContent = this.options.tooltip.formatter(data.value, data);
     } else {
-      content = `${data.label}: ${data.value.toFixed(1)}%`;
+      this.tooltipEl.textContent = `${data.label}: ${data.value.toFixed(1)}%`;
     }
-
-    this.tooltipEl.innerHTML = content;
     this.tooltipEl.style.left = `${x + 10}px`;
     this.tooltipEl.style.top = `${y + 10}px`;
     this.tooltipEl.style.display = 'block';

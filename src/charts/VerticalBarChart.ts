@@ -465,16 +465,16 @@ export class VerticalBarChart {
       document.body.appendChild(this.tooltipEl);
     }
 
-    let content = '';
+    // Clear previous content (XSS safe)
+    this.tooltipEl.textContent = '';
 
     if (this.options.tooltip.formatter) {
-      content = this.options.tooltip.formatter(data.value, data);
+      // Use textContent for user-provided formatter output (XSS safe)
+      this.tooltipEl.textContent = this.options.tooltip.formatter(data.value, data);
     } else {
       const valueStr = this.options.allowDecimals ? data.value.toFixed(1) : data.value.toString();
-      content = `${data.label}: ${valueStr}`;
+      this.tooltipEl.textContent = `${data.label}: ${valueStr}`;
     }
-
-    this.tooltipEl.innerHTML = content;
     this.tooltipEl.style.left = `${x + 10}px`;
     this.tooltipEl.style.top = `${y - 30}px`;
     this.tooltipEl.style.display = 'block';
