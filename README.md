@@ -4,7 +4,7 @@
 > Zero dependencies. Canvas-based. 11 chart types.
 
 [![npm version](https://img.shields.io/npm/v/@mango0422/micro-charts.svg)](https://www.npmjs.com/package/@mango0422/micro-charts)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@mango0422/micro-charts.svg)](https://bundlephobia.com/package/@mango0422/micro-charts)
+![bundle-phobia](https://badgen.net/bundlephobia/min/@mango0422/micro-charts)
 
 ## Features
 
